@@ -1,0 +1,528 @@
+{
+  "id": "c5beec59-2b88-4f3f-ba35-7640a58a9ba6",
+  "revision": 0,
+  "last_node_id": 194,
+  "last_link_id": 234,
+  "nodes": [
+    {
+      "id": 164,
+      "type": "VAEDecode",
+      "pos": [
+        273.9275312275651,
+        152.81873844608415
+      ],
+      "size": [
+        225,
+        54
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 187
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 233
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            234
+          ]
+        }
+      ],
+      "title": "VAE Decode ⏱ 0.3s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.32",
+        "Node name for S&R": "VAEDecode"
+      }
+    },
+    {
+      "id": 190,
+      "type": "ConditioningZeroOut",
+      "pos": [
+        -51.25410885325098,
+        568.2360922319655
+      ],
+      "size": [
+        225,
+        34
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "conditioning",
+          "type": "CONDITIONING",
+          "link": 219
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "links": [
+            220
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.76",
+        "Node name for S&R": "ConditioningZeroOut"
+      }
+    },
+    {
+      "id": 162,
+      "type": "EmptySD3LatentImage",
+      "pos": [
+        -340.4409160713849,
+        654.9742912083202
+      ],
+      "size": [
+        250.609375,
+        118
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            186
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.32",
+        "Node name for S&R": "EmptySD3LatentImage"
+      },
+      "widgets_values": [
+        1024,
+        1024,
+        1
+      ],
+      "widgets_values_named": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      },
+      "color": "#323",
+      "bgcolor": "#535"
+    },
+    {
+      "id": 191,
+      "type": "ModelSamplingAuraFlow",
+      "pos": [
+        -358.3556148688775,
+        185.92363910437763
+      ],
+      "size": [
+        270,
+        86
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 231
+        }
+      ],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            225
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.76",
+        "Node name for S&R": "ModelSamplingAuraFlow"
+      },
+      "widgets_values": [
+        3,
+        "flow"
+      ],
+      "widgets_values_named": {
+        "shift": 3,
+        "sampling": "flow"
+      }
+    },
+    {
+      "id": 145,
+      "type": "MarkdownNote",
+      "pos": [
+        -1054.3745198572014,
+        358.42477957992116
+      ],
+      "size": [
+        514.21875,
+        377.1875
+      ],
+      "flags": {
+        "collapsed": false
+      },
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "title": "🐺 Lyonir Studio - Notes",
+      "properties": {},
+      "widgets_values": [
+        "# MODELS & NODES USADOS NO WORKFLOW\n\n---\n\n## 🟣 Load Checkpoint\n### Download **z-image-turbo-fp8-aio.safetensors** ~10GB [BAIXE AQUI](https://huggingface.co/SeeSee21/Z-Image-Turbo-AIO/resolve/main/z-image-turbo-fp8-aio.safetensors?download=true)\n\n### Or \n\n### Download **z-image-turbo-bf16-aio.safetensors** ~20 GB [BAIXE AQUI](https://huggingface.co/SeeSee21/Z-Image-Turbo-AIO/resolve/main/z-image-turbo-bf16-aio.safetensors?download=true)\n\n📁 **Colocar em:** `ComfyUI/models/checkpoints` \n\nMais detalhes sobre AIO models [AQUI](https://huggingface.co/SeeSee21/Z-Image-Turbo-AIO)\n\n---\n\n## 🧩 Nodes Instalados pelo Manager  \n\n- Nenhum\n\n---\n\n## 📚 Recursos \n🎥 **Tutoriais:** [Lyonir Studio YouTube Channel](https://www.youtube.com/@lyonir2893)  \n💬 **Comunidade no Discord:** [Junte-se](https://discord.gg/yEAG4Jgnms)\n"
+      ],
+      "widgets_values_named": {
+        "text": "# MODELS & NODES USADOS NO WORKFLOW\n\n---\n\n## 🟣 Load Checkpoint\n### Download **z-image-turbo-fp8-aio.safetensors** ~10GB [BAIXE AQUI](https://huggingface.co/SeeSee21/Z-Image-Turbo-AIO/resolve/main/z-image-turbo-fp8-aio.safetensors?download=true)\n\n### Or \n\n### Download **z-image-turbo-bf16-aio.safetensors** ~20 GB [BAIXE AQUI](https://huggingface.co/SeeSee21/Z-Image-Turbo-AIO/resolve/main/z-image-turbo-bf16-aio.safetensors?download=true)\n\n📁 **Colocar em:** `ComfyUI/models/checkpoints` \n\nMais detalhes sobre AIO models [AQUI](https://huggingface.co/SeeSee21/Z-Image-Turbo-AIO)\n\n---\n\n## 🧩 Nodes Instalados pelo Manager  \n\n- Nenhum\n\n---\n\n## 📚 Recursos \n🎥 **Tutoriais:** [Lyonir Studio YouTube Channel](https://www.youtube.com/@lyonir2893)  \n💬 **Comunidade no Discord:** [Junte-se](https://discord.gg/yEAG4Jgnms)\n"
+      },
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 193,
+      "type": "CheckpointLoaderSimple",
+      "pos": [
+        -988.2086356862342,
+        215.05580952784925
+      ],
+      "size": [
+        441.375,
+        102
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "MODEL",
+          "type": "MODEL",
+          "links": [
+            231
+          ]
+        },
+        {
+          "name": "CLIP",
+          "type": "CLIP",
+          "links": [
+            232
+          ]
+        },
+        {
+          "name": "VAE",
+          "type": "VAE",
+          "links": [
+            233
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.76",
+        "Node name for S&R": "CheckpointLoaderSimple"
+      },
+      "widgets_values": [
+        "z-image-turbo-fp8-aio.safetensors"
+      ],
+      "widgets_values_named": {
+        "ckpt_name": "z-image-turbo-fp8-aio.safetensors"
+      }
+    },
+    {
+      "id": 163,
+      "type": "KSampler",
+      "pos": [
+        -51.25801933433452,
+        248.92014540270492
+      ],
+      "size": [
+        296.21875,
+        262
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "model",
+          "type": "MODEL",
+          "link": 225
+        },
+        {
+          "name": "positive",
+          "type": "CONDITIONING",
+          "link": 223
+        },
+        {
+          "name": "negative",
+          "type": "CONDITIONING",
+          "link": 220
+        },
+        {
+          "name": "latent_image",
+          "type": "LATENT",
+          "link": 186
+        }
+      ],
+      "outputs": [
+        {
+          "name": "LATENT",
+          "type": "LATENT",
+          "slot_index": 0,
+          "links": [
+            187
+          ]
+        }
+      ],
+      "title": "KSampler ⏱ 9.7s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "KSampler"
+      },
+      "widgets_values": [
+        202103464772615,
+        "randomize",
+        5,
+        1,
+        "dpmpp_sde",
+        "beta",
+        1
+      ],
+      "widgets_values_named": {
+        "seed": 202103464772615,
+        "control_after_generate": "randomize",
+        "steps": 5,
+        "cfg": 1,
+        "sampler_name": "dpmpp_sde",
+        "scheduler": "beta",
+        "denoise": 1
+      }
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [
+        -510.6173893074787,
+        301.16852260814346
+      ],
+      "size": [
+        424.421875,
+        293.015625
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "clip",
+          "type": "CLIP",
+          "link": 232
+        }
+      ],
+      "outputs": [
+        {
+          "name": "CONDITIONING",
+          "type": "CONDITIONING",
+          "slot_index": 0,
+          "links": [
+            219,
+            223
+          ]
+        }
+      ],
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.27",
+        "Node name for S&R": "CLIPTextEncode"
+      },
+      "widgets_values": [
+        "Photorealistic futuristic cyberpunk robot standing in the middle of a dark abandoned street at night, destroyed urban environment, wet asphalt, scattered debris, subtle smoke, neon reflections on the ground, dramatic cinematic lighting, deep shadows, strong rim light, soft volumetric haze, detailed metallic armor, glowing blue and purple accents, realistic reflections, ultra-realistic textures, high detail, Sony FX30, 35mm f/1.4, shallow depth of field, realistic bokeh, premium sci-fi look, natural colors, high-end VFX quality.\n"
+      ],
+      "widgets_values_named": {
+        "text": "Photorealistic futuristic cyberpunk robot standing in the middle of a dark abandoned street at night, destroyed urban environment, wet asphalt, scattered debris, subtle smoke, neon reflections on the ground, dramatic cinematic lighting, deep shadows, strong rim light, soft volumetric haze, detailed metallic armor, glowing blue and purple accents, realistic reflections, ultra-realistic textures, high detail, Sony FX30, 35mm f/1.4, shallow depth of field, realistic bokeh, premium sci-fi look, natural colors, high-end VFX quality.\n"
+      },
+      "color": "#232",
+      "bgcolor": "#353"
+    },
+    {
+      "id": 194,
+      "type": "Lyonir_SaveImage",
+      "pos": [
+        527.8141885087905,
+        154.00614713182145
+      ],
+      "size": [
+        625.4375,
+        685.578125
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "link": 234
+        }
+      ],
+      "outputs": [
+        {
+          "name": "image",
+          "type": "IMAGE",
+          "links": null
+        }
+      ],
+      "title": "🐺 Lyonir Save Image ⏱ 0.5s",
+      "properties": {
+        "cnr_id": "comfyui_fearnworksnodes",
+        "ver": "0.1.2",
+        "Node name for S&R": "Lyonir_SaveImage"
+      },
+      "widgets_values": [
+        "Lyonir",
+        "Lyonir",
+        18
+      ],
+      "widgets_values_named": {
+        "filename_prefix": "Lyonir",
+        "subfolder": "Lyonir",
+        "history_limit": 18
+      },
+      "color": "#223",
+      "bgcolor": "#335"
+    }
+  ],
+  "links": [
+    [
+      186,
+      162,
+      0,
+      163,
+      3,
+      "LATENT"
+    ],
+    [
+      187,
+      163,
+      0,
+      164,
+      0,
+      "LATENT"
+    ],
+    [
+      219,
+      6,
+      0,
+      190,
+      0,
+      "CONDITIONING"
+    ],
+    [
+      220,
+      190,
+      0,
+      163,
+      2,
+      "CONDITIONING"
+    ],
+    [
+      223,
+      6,
+      0,
+      163,
+      1,
+      "CONDITIONING"
+    ],
+    [
+      225,
+      191,
+      0,
+      163,
+      0,
+      "MODEL"
+    ],
+    [
+      231,
+      193,
+      0,
+      191,
+      0,
+      "MODEL"
+    ],
+    [
+      232,
+      193,
+      1,
+      6,
+      0,
+      "CLIP"
+    ],
+    [
+      233,
+      193,
+      2,
+      164,
+      1,
+      "VAE"
+    ],
+    [
+      234,
+      164,
+      0,
+      194,
+      0,
+      "IMAGE"
+    ]
+  ],
+  "groups": [],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.7627768444385532,
+      "offset": [
+        1208.1388685677668,
+        123.37814349208618
+      ]
+    },
+    "frontendVersion": "1.52.7",
+    "node_versions": {
+      "ComfyUI-GGUF": "8098c7149fa4ff14991eb3347a5585051ceeafbe",
+      "comfy-core": "v0.3.10-37-gd055325",
+      "rgthree-comfy": "5d771b8b56a343c24a26e8cea1f0c87c3d58102f"
+    },
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true,
+    "workflowRendererVersion": "LG"
+  },
+  "version": 0.4,
+  "seed_widgets": {
+    "163": 0
+  }
+}
