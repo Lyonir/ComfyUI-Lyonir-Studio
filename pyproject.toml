@@ -1,9 +1,15 @@
 [project]
 name = "comfyui-lyonir-studio"
 version = "3.5.13"
-description = "Lyonir Studio unified ComfyUI nodes: Qwen3-TTS, Image Compare, persistent Save Image/Video Galleries, and multi-model custom sampling for MiniMax H3, LTX, Bernini-R and Wan"
+description = "Lyonir Studio nodes for ComfyUI: multi-model sampler, resolution, image comparison, persistent image/video galleries and Qwen3-TTS."
 requires-python = ">=3.10"
-license = { text = "Apache-2.0" }
+license = { file = "LICENSE" }
+dependencies = ["opencv-python>=4.8", "numpy", "Pillow"]
+
+[project.urls]
+Repository = "https://github.com/Lyonir/ComfyUI-Lyonir-Studio"
+Documentation = "https://github.com/Lyonir/ComfyUI-Lyonir-Studio#readme"
 
 [tool.comfy]
+PublisherId = "lyonir-studio"
 DisplayName = "Lyonir Studio"
