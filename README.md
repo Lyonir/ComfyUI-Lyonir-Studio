@@ -92,15 +92,16 @@ Restart ComfyUI. If frontend files changed, refresh the browser as well.
 
 ## Examples
 
-Optional example material lives under:
+Four downloadable workflows with screenshots and model filenames are available in the [example guide](examples/README.md):
 
-```text
-examples/
-├── workflows/
-└── screenshots/
-```
+- MiniMax H3 first/last-frame video.
+- MiniMax H3 reference-to-video.
+- LTX 2.5 video with latent upscale.
+- Z-Image Turbo using Lyonir Save Image.
 
-Workflows and screenshots can be added progressively without changing the runtime installation structure.
+![MiniMax H3 and Lyonir Save Video](examples/screenshots/minimax-video-gallery.png)
+
+Model weights and reference images must be provided separately. See the guide before running an example.
 
 ## Troubleshooting
 
