@@ -1,0 +1,14 @@
+ComfyUI-Lyonir-Qwen3TTS v1.0.1
+Copyright 2026 Lyonir Studio
+
+Default PT-BR stack:
+- Qwen3-TTS — Apache-2.0
+- flybirdxx/ComfyUI-Qwen-TTS backend bridge — Apache-2.0
+- acidente/fala_pb_checkpoints / QwenTTS PT-BR checkpoint family
+
+Optional beta:
+- FunAudioLLM/CosyVoice2-0.5B — Apache-2.0
+- neocia/cosyvoice2-cml-nurc-prosodic — Apache-2.0
+- FL CosyVoice3 ComfyUI backend — Apache-2.0
+
+Chatterbox is no longer used by v0.8.2.

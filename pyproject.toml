@@ -1,0 +1,9 @@
+[project]
+name = "comfyui-lyonir-studio"
+version = "3.5.13"
+description = "Lyonir Studio unified ComfyUI nodes: Qwen3-TTS, Image Compare, persistent Save Image/Video Galleries, and multi-model custom sampling for MiniMax H3, LTX, Bernini-R and Wan"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+
+[tool.comfy]
+DisplayName = "Lyonir Studio"

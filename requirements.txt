@@ -1,0 +1,5 @@
+# Lyonir Studio custom node pack
+# Do NOT pin or replace Torch/Torchvision/Transformers from the user's ComfyUI.
+opencv-python>=4.8
+numpy
+Pillow

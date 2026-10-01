@@ -1,0 +1,69 @@
+{
+  "name": "comfyui-lyonir-studio",
+  "version": "3.5.13",
+  "private": false,
+  "description": "Lyonir Studio custom nodes for ComfyUI",
+  "lyonir": {
+    "sampler": "multi-model",
+    "modelFamilies": [
+      "auto",
+      "minimax",
+      "ltx",
+      "bernini",
+      "wan"
+    ],
+    "resolution": {
+      "outputs": [
+        "width",
+        "height"
+      ],
+      "nativeCanvasPolicy": "family-aware: ltx=ceil-to-64, others=ceil-to-32",
+      "finalOutputPolicy": "hard-crop-no-upscale"
+    },
+    "ltxPostSampling": "automatic IC-LoRA guide crop before decode",
+    "samplerInputLayout": "negative directly below conditioning; negative remains optional",
+    "saveImageGallery": {
+      "node": "Lyonir_SaveImage",
+      "displayName": "🐺 Lyonir Save Image",
+      "storage": "persistent output files + per-node history manifest",
+      "ui": "larger preview-first responsive image gallery with compact thumbnail strip and hidden empty-state text",
+      "imageOutput": "passthrough current image",
+      "layout": "transparent seamless surface reveals the exact node body color; larger preview area; compact control row; no empty-state text; no internal black panel",
+      "resizePolicy": "compact native default; ComfyUI owns DOM widget layout; preview/thumbnails expand only from explicit user resize; no computedHeight feedback loop",
+      "surfacePolicy": "all non-image gallery surfaces and the immediate DOM host match the node background exactly",
+      "interaction": "left-click preview is passive; right-click opens ComfyUI node menu with Open Image, Copy Image, Save Image, MaskEditor; Open button remains explicit",
+      "contextMenu": "forces ComfyUI node context menu and suppresses browser-native image menu"
+    },
+    "saveVideoGallery": {
+      "node": "Lyonir_SaveVideo",
+      "displayName": "🐺 Lyonir Save Video",
+      "input": "exact installed VHS_VideoCombine inputs + Lyonir bit_depth",
+      "encoding": "delegated directly to the installed VHS_VideoCombine; no parallel Lyonir encoder",
+      "storage": "Video Combine master output + persistent per-node UUID-keyed Lyonir history manifest + gallery thumbnails/proxies when needed",
+      "ui": "Video Combine-dominant preview: the current video fills essentially the full usable node width; prior-video history remains a deliberately small strip below it.",
+      "videoOutput": "same VHS_FILENAMES return contract as Video Combine",
+      "interaction": "latest successful save becomes the main preview automatically; prior outputs are selectable below; right-click is forwarded into ComfyUI native node context menu exactly like VHS",
+      "surfacePolicy": "transparent seamless surface reveals exact node body color; larger preview area; compact control row; no internal black/contrasting panel",
+      "resizePolicy": "Strict width-driven proportional resizing. Any resize request is normalized through setSize and onResize: width is the only free dimension, height is automatically recomputed from all controls plus the Video Combine-style media aspect ratio. Horizontal drag therefore grows downward at the same time; vertical-only stretching cannot persist.",
+      "contextMenu": "native ComfyUI node menu with Video Combine-style preview actions (Open/Save preview, filepath/workflow, Pause/Hide/Sync/Mute) plus standard/rgthree node actions",
+      "controls": "all controls and format-specific widgets exposed by the installed Video Combine, plus bit_depth",
+      "browserPreview": "gallery may create a hidden H.264 playback proxy only when the master codec is not browser-friendly; Open/Save always target the original master",
+      "saveCorrectness": "encoding remains delegated to the installed VHS_VideoCombine and the completed master is verified on disk before history is updated",
+      "frontendCompatibility": "uses window.comfyAPI.widgetInputs when available; no direct import of deprecated /extensions/core/widgetInputs.js legacy shim",
+      "bitDepthCompatibility": "Explicit bit depth is enforced when the active Video Combine preset exposes pix_fmt. Presets that intentionally hide pix_fmt (including ProRes in some VHS builds) are delegated unchanged instead of aborting; the saved master is then probed and its actual pixel depth is recorded when ffprobe can determine it.",
+      "audioHover": "Video Combine parity: preview is forced muted whenever the pointer is outside the video; VHS.DefaultMute preference is applied only while hovering.",
+      "syncPreview": "Shares the native vhs_preview class/contract so Sync preview works bidirectionally between Lyonir Save Video and VHS Video Combine.",
+      "previewPriority": "The current video is always the dominant visual surface and cannot remain tiny inside a large node. Media uses width:100% / height:auto like VHS, avoiding object-fit letterboxing caused by oversized DOM containers.",
+      "historySizing": "Prior-video thumbnails are capped to a compact 24–48 px range so history never steals significant space from the main preview.",
+      "historyIdentity": "Persistent per-node UUID stored only in node.properties; no visible lyonir_history_id widget/input. New nodes start empty, reloads restore only their own history, and clones are deduplicated."
+    },
+    "galleryGeometryFix": "v3.5.13 preserves all v3.5.12 history isolation and moves the persistent UUID out of the visible input/widget surface into serialized node properties only.",
+    "imageCompare": {
+      "node": "Lyonir_ImageCompare",
+      "displayName": "🐺 Lyonir Image Compare",
+      "ui": "preview-first transparent A/B compare surface matching Save Image behavior",
+      "layout": "no black placeholder panel; no instructional empty-state text; compare area fills the node body",
+      "contextMenu": "Open Image, Copy Image, Save Image, MaskEditor; action follows the image under the pointer"
+    }
+  }
+}
