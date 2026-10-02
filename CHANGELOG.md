@@ -1,5 +1,10 @@
 # Changelog
 
+## v3.5.14
+
+- Add 🐺 Lyonir Model Family to share a family selection with Resolution and Sampler.
+- Preserve existing node IDs, dropdowns and workflow behavior.
+
 ## v3.5.13
 
 Initial public GitHub release baseline.

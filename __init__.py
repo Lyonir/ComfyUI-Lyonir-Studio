@@ -11,10 +11,12 @@ from .nodes import (
 from .image_compare import LyonirImageCompare
 from .lyonir_sampler import LyonirSampler
 from .resolution import LyonirResolution
+from .model_family import LyonirModelFamily
 from .save_image_gallery import LyonirSaveImage
 from .save_video_gallery import LyonirSaveVideo
 
 NODE_CLASS_MAPPINGS = {
+    "Lyonir_ModelFamily": LyonirModelFamily,
     "Lyonir_Qwen3TTSVoiceClone": LyonirQwen3TTSVoiceClone,
     "Lyonir_Qwen3TTSVoiceDesign": LyonirQwen3TTSVoiceDesign,
     "Lyonir_Qwen3TTSCustomVoice": LyonirQwen3TTSCustomVoice,
@@ -26,6 +28,7 @@ NODE_CLASS_MAPPINGS = {
 }
 
 NODE_DISPLAY_NAME_MAPPINGS = {
+    "Lyonir_ModelFamily": "🐺 Lyonir Model Family",
     "Lyonir_Qwen3TTSVoiceClone": "🐺 Lyonir Qwen3-TTS Voice Clone",
     "Lyonir_Qwen3TTSVoiceDesign": "🐺 Lyonir Qwen3-TTS Voice Design",
     "Lyonir_Qwen3TTSCustomVoice": "🐺 Lyonir Qwen3-TTS Custom Voice",
@@ -36,7 +39,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Lyonir_SaveVideo": "🐺 Lyonir Save Video",
 }
 
-__version__ = "3.5.13"
+__version__ = "3.5.14"
 
 print(f"[Lyonir Studio] v{__version__} loaded")
 

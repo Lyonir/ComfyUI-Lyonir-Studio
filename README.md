@@ -2,10 +2,11 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.13**.
+Current public version: **v3.5.14**.
 
 ## Included nodes
 
+- 🐺 Lyonir Model Family
 - 🐺 Lyonir Sampler
 - 🐺 Lyonir Resolution
 - 🐺 Lyonir Save Image
@@ -14,6 +15,10 @@ Current public version: **v3.5.13**.
 - 🐺 Lyonir Qwen3-TTS Voice Clone
 - 🐺 Lyonir Qwen3-TTS Voice Design
 - 🐺 Lyonir Qwen3-TTS Custom Voice
+
+## Lyonir Model Family
+
+Select the model family once and connect the output to the `model_family` inputs of Lyonir Resolution and Lyonir Sampler. Convert their dropdown widgets to inputs when needed. This node selects a family; it does not load a model.
 
 ## Example workflows
 
