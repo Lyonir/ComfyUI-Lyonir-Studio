@@ -145,10 +145,30 @@ git clone https://github.com/Lyonir/ComfyUI-Lyonir-Studio.git
 Then install the Python requirements using the same Python environment used by ComfyUI:
 
 ```bash
-pip install -r ComfyUI-Lyonir-Studio/requirements.txt
+python -m pip install -r ComfyUI-Lyonir-Studio/requirements.txt
 ```
 
 Restart ComfyUI.
+
+### ComfyUI Windows Portable
+
+Open PowerShell or a terminal in the **ComfyUI_windows_portable** folder (the folder containing `python_embeded` and `ComfyUI`).
+
+If you have not downloaded the pack yet, run:
+
+```powershell
+git clone https://github.com/Lyonir/ComfyUI-Lyonir-Studio.git .\ComfyUI\custom_nodes\ComfyUI-Lyonir-Studio
+```
+
+Then install the dependencies using the Portable's own Python:
+
+```powershell
+.\python_embeded\python.exe -m pip install -r .\ComfyUI\custom_nodes\ComfyUI-Lyonir-Studio\requirements.txt
+```
+
+If the pack is already installed, skip the clone command and run only the dependency command. This command also applies after extracting the ZIP into the custom_nodes folder. Using the bundled Python ensures the dependencies are installed in the environment ComfyUI uses.
+
+Restart ComfyUI after installation.
 
 ### Manual installation
 
@@ -193,4 +213,5 @@ Model weights, third-party packages, voice data and upstream projects may have t
 
 - Website: https://www.lyonirstudio.com/
 - Portfolio: https://lyonirstudios.myportfolio.com/
+
 
