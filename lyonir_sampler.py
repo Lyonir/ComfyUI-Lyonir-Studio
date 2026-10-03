@@ -5,7 +5,8 @@ from typing import Optional
 
 import torch
 
-from .progress_utils import make_progress, update_progress
+from .progress_utils import update_progress
+from .sampler_progress import total_progress, make_sampler_progress as make_progress
 
 
 CROP_ANCHORS = [
@@ -552,6 +553,7 @@ class LyonirSampler:
         "If you want a second stage or another model, chain a second Lyonir Sampler in the workflow instead of using a secondary model inside the node."
     )
 
+    @total_progress
     def generate(
         self,
         model,
@@ -583,6 +585,7 @@ class LyonirSampler:
         if family == "ltx":
             _validate_ltx_canvas(latent, target_width, target_height)
 
+        pbar.stage(8, 76)
         if family == "minimax":
             source_width, source_height = _validate_minimax_native_latent(latent, target_width, target_height)
             sampled, guider_name, passes = _sample_minimax_v28(
@@ -619,11 +622,13 @@ class LyonirSampler:
             )
             sampled = sampled_for_decode
 
+        pbar.stage(76, 87)
         images = _decode_video(video_vae, sampled_for_decode)
         update_progress(pbar, 87)
         if images is not None:
             images = _crop_images(images, requested_width, requested_height, crop_anchor)
         update_progress(pbar, 93)
+        pbar.stage(93, 98)
         audio = _decode_audio(audio_vae, sampled_for_decode)
         update_progress(pbar, 98)
 

@@ -34,3 +34,7 @@ bundled FFmpeg supplies basic output stream information for bit-depth checks.
 Public packaging validation: the compressed Windows FFmpeg extracted with its expected SHA256; all 18 encoding cases passed again using this private extracted binary. The four published example JSON workflows match the repository snapshots; the three video examples passed with their saved export settings and synthetic media. Full real-model generation was not run.
 
 Numbered archive parts: private automatic assembly and SHA256 verification passed from an empty executable cache, followed by all 18 encoding cases again. The executable is identical to the previous tested full build.
+
+Sampler total-progress test build: simulated native sampling and repeated tiled VAE progress remained monotonic with a fixed total of 100. Preview payloads were preserved, other-thread updates passed through, and the original progress hook was restored after success and failure. AST comparison confirmed the original generate signature and processing statements are unchanged. Python syntax passed. Real-model generation and live UI validation of this progress update were not run.
+
+User acceptance: the user tested the sampler progress build in their ComfyUI, reported that it was working correctly, and authorized publication. Public release code is identical to that accepted test build; only release documentation differs.

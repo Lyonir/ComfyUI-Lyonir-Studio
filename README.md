@@ -2,7 +2,11 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.15**.
+Current public version: **v3.5.16**.
+
+## Sampler total progress in v3.5.16
+
+Lyonir Sampler displays one total progress bar across generation, video decoding, cropping and audio decoding. Progress only moves forward; native preview images and the generation settings are preserved.
 
 ## Independent Save Video in v3.5.15
 

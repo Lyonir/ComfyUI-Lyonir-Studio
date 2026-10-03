@@ -1,3 +1,7 @@
+# v3.5.16
+
+Lyonir Sampler now reports one monotonic total progress across sampling, video decoding, cropping and audio decoding. Native preview images are preserved. No sampling parameters or output processing changed.
+
 # v3.5.15
 - Internal VideoCombine-compatible video encoder; external VHS installation no longer required for Save Video.
 - Windows x64 FFmpeg bundled inside the node folder; no automatic pip or global configuration changes.
