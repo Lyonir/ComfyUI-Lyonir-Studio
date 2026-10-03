@@ -180,23 +180,9 @@ def _append_history(node_id: Any, entry: dict[str, Any]) -> None:
 
 
 def _resolve_vhs_video_combine():
-    try:
-        import nodes as comfy_nodes
-    except Exception as exc:
-        raise RuntimeError("Lyonir Save Video could not access ComfyUI's node registry.") from exc
-
-    cls = getattr(comfy_nodes, "NODE_CLASS_MAPPINGS", {}).get("VHS_VideoCombine")
-    if cls is None:
-        raise RuntimeError(
-            "Lyonir Save Video mirrors Video Combine and requires a node registered as VHS_VideoCombine. "
-            "Install/enable the Video Combine package already used by your workflows, then restart ComfyUI."
-        )
-    if cls is LyonirSaveVideo:
-        raise RuntimeError("Lyonir Save Video detected an invalid recursive VHS_VideoCombine mapping.")
-    combine = getattr(cls, "combine_video", None)
-    if not callable(combine):
-        raise RuntimeError("The installed VHS_VideoCombine does not expose combine_video(). Update that node pack.")
-    return cls
+    # Preserve the workflow ABI while resolving the pack's own encoder.
+    from .video_engine.encoder import VideoCombine
+    return VideoCombine
 
 
 def _copy_vhs_input_types() -> dict[str, Any]:
@@ -472,7 +458,24 @@ def _find_ffprobe(ffmpeg: str | None) -> str | None:
 def _probe_media(path: Path, ffmpeg: str | None) -> dict[str, Any]:
     ffprobe = _find_ffprobe(ffmpeg)
     if not ffprobe:
-        return {}
+        if not ffmpeg:
+            return {}
+        # The bundled FFmpeg can inspect streams without a separate ffprobe.
+        try:
+            result = subprocess.run(
+                [ffmpeg, "-hide_banner", "-i", str(path), "-map", "0:v:0", "-frames:v", "0", "-f", "null", "-"],
+                capture_output=True, text=True, timeout=15,
+            )
+            text = result.stderr or ""
+            stream = next((line for line in text.splitlines() if "Stream #0:" in line and "Video:" in line), "")
+            match = re.search(r"Video:\s*([^,\s]+).*?,\s*([a-z][a-z0-9]+)(?:\([^)]*\))?,\s*(\d+)x(\d+)", stream)
+            duration = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", text)
+            if not match:
+                return {}
+            seconds = (int(duration[1])*3600 + int(duration[2])*60 + float(duration[3])) if duration else 0.0
+            return {"codec": match[1], "pixel_format": match[2], "width": int(match[3]), "height": int(match[4]), "duration": seconds, "frame_count": 0}
+        except Exception:
+            return {}
     cmd = [
         ffprobe,
         "-v", "error",
@@ -618,6 +621,14 @@ def _entry_from_success(
 
     master_path: Path | None = None
     fullpath = str(preview.get("fullpath", "") or "")
+    # FFmpeg image-sequence outputs return a filename pattern, not a file.
+    # Keep the original sequence on disk and use its first frame in the gallery.
+    if "%03d" in fullpath and str(format_name).endswith("bit-png"):
+        first_frame = Path(fullpath.replace("%03d", "001"))
+        if first_frame.is_file():
+            fullpath = str(first_frame)
+            filename = first_frame.name
+            format_name = "image/png"
     if fullpath:
         candidate = Path(fullpath)
         if candidate.is_file():
@@ -748,8 +759,8 @@ class LyonirSaveVideo:
     CATEGORY = "Lyonir Studio/Video"
     FUNCTION = "combine_video"
     DESCRIPTION = (
-        "Video Combine-compatible output node with persistent Lyonir history. Encoding is delegated directly to "
-        "the installed VHS_VideoCombine so formats, format-specific widgets, naming, audio, metadata, ping-pong, "
+        "Video Combine-compatible output node with persistent Lyonir history. Encoding is performed by "
+        "the internal VideoCombine-compatible encoder so formats, format-specific widgets, naming, audio, metadata, ping-pong, "
         "Meta Batch, VAE and save behavior stay aligned with Video Combine. The frontend mirrors the VHS preview "
         "and native node context menu, while adding selectable previous outputs and explicit bit-depth selection."
     )

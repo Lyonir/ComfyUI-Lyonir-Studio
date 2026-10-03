@@ -1,10 +1,10 @@
 [project]
 name = "comfyui-lyonir-studio"
-version = "3.5.14"
+version = "3.5.15"
 description = "Lyonir Studio nodes for ComfyUI: multi-model sampler, resolution, image comparison, persistent image/video galleries and Qwen3-TTS."
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-dependencies = ["opencv-python>=4.8", "numpy", "Pillow"]
+dependencies = ["opencv-python>=4.8", "numpy", "Pillow", "imageio-ffmpeg>=0.6.0; platform_system != 'Windows'"]
 
 [project.urls]
 Repository = "https://github.com/Lyonir/ComfyUI-Lyonir-Studio"

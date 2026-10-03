@@ -22,3 +22,6 @@ cache/
 output/
 temp/
 *.log
+
+# Private extracted FFmpeg cache
+vendor/runtime/

@@ -2,7 +2,13 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.14**.
+Current public version: **v3.5.15**.
+
+## Independent Save Video in v3.5.15
+
+The Save Video engine is included in this pack, preserving node identifiers, saved workflow connections, export presets, audio, batch handling and the selectable video history. See [TEST_REPORT.md](TEST_REPORT.md) for validation and its limits.
+
+To update an existing Windows installation with the pack dependencies already working: close ComfyUI, back up the old Lyonir folder outside `custom_nodes`, replace it with the complete new folder, then restart ComfyUI and refresh the browser. Keep only one copy of this pack in `custom_nodes`. No extra pip command is needed specifically for the Windows video engine.
 
 ## Included nodes
 
@@ -22,7 +28,7 @@ Select the model family once and connect the output to the `model_family` inputs
 
 ## Example workflows
 
-Download a JSON below and drag it into ComfyUI. These examples use the public Lyonir nodes in v3.5.13 or later. Install the pack requirements and ComfyUI-VideoHelperSuite for video output. Models and reference media are not bundled. Screenshots illustrate the author's local workflows; they are not an automated execution guarantee.
+Download a JSON below and drag it into ComfyUI. These examples use the public Lyonir nodes in v3.5.13 or later. Install the pack requirements. Lyonir Save Video includes its own video encoding engine; no separate VideoHelperSuite installation is required for this node. Models and reference media are not bundled. Screenshots illustrate the author's local workflows; they are not an automated execution guarantee.
 
 Use ComfyUI Manager to identify missing nodes. Depending on the example, your ComfyUI build must provide MiniMax H3, LTX 2.5, ComfyMathExpression and ComfySwitchNode support. Select equivalent model files available in your own installation.
 
@@ -100,7 +106,7 @@ Model filenames used in this example:
 
 Designed to behave like VideoHelperSuite's **Video Combine** while adding a persistent per-node video history.
 
-- Delegates final encoding to the installed `VHS_VideoCombine`.
+- Uses an internal VideoCombine-compatible engine and bundled FFmpeg on Windows x64.
 - Uses the formats and format-specific controls exposed by Video Combine.
 - Adds bit-depth handling where the selected format exposes a controllable pixel format.
 - Keeps previous generated videos available as selectable thumbnails.
@@ -108,7 +114,7 @@ Designed to behave like VideoHelperSuite's **Video Combine** while adding a pers
 - Proportional preview/node resizing.
 - Adjustable thumbnail-size slider.
 - VideoHelperSuite-compatible hover audio and **Sync Preview** behavior.
-- ProRes presets that manage their own pixel format are delegated to Video Combine instead of aborting the render.
+- ProRes presets that manage their own pixel format keep their native pixel format and report the actual saved bit depth. ProRes supports up to 12-bit color; selecting 16-bit does not produce 16-bit ProRes color.
 
 ### Lyonir Save Image
 
@@ -126,7 +132,7 @@ Voice Clone, Voice Design and Custom Voice nodes. Review [NOTICE](NOTICE) and [C
 
 - A working **ComfyUI** installation.
 - Python dependencies listed in `requirements.txt`.
-- **ComfyUI-VideoHelperSuite** for `🐺 Lyonir Save Video`, because that node delegates final video encoding to the installed `VHS_VideoCombine`.
+- Lyonir Save Video includes FFmpeg for Windows x64. On first use it extracts the verified executable into `vendor/runtime/` inside this pack. No global installation, PATH change, Python/Torch replacement or automatic pip is performed. Other VHS nodes in your workflows still require their own package.
 
 - **Qwen3-TTS voice nodes:** install [ComfyUI-Qwen-TTS](https://github.com/flybirdxx/ComfyUI-Qwen-TTS) and its dependencies in the same ComfyUI environment. This provides the backend used by the voice nodes. Model files are downloaded or configured separately.
 
@@ -199,11 +205,11 @@ If a node does not appear after installation:
 4. Restart ComfyUI completely.
 5. Refresh the browser frontend.
 
-For `Lyonir Save Video`, also confirm that **ComfyUI-VideoHelperSuite** is installed and `VHS_VideoCombine` is available.
+For Lyonir Save Video on Windows x64, keep the complete `vendor` folder and ensure the pack can write to its own `vendor/runtime` folder. NVENC presets require compatible NVIDIA hardware and drivers. Optional gifski presets require the gifski executable. Linux/macOS use imageio-ffmpeg from the requirements.
 
 ## License
 
-The Lyonir Studio code in this repository is distributed under the license included in [LICENSE](LICENSE).
+This combined distribution is licensed under GPL-3.0 ([LICENSE](LICENSE)), because its internal video engine includes adapted VideoHelperSuite code. Original Lyonir files retain their Apache-2.0 terms ([LICENSE-APACHE-2.0](LICENSE-APACHE-2.0)). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for upstream credits, source and FFmpeg build information.
 
 Model weights, third-party packages, voice data and upstream projects may have their own licenses and usage restrictions. See [NOTICE](NOTICE) and [COMMERCIAL_LICENSES.md](COMMERCIAL_LICENSES.md).
 

@@ -1,6 +1,6 @@
 {
   "name": "comfyui-lyonir-studio",
-  "version": "3.5.14",
+  "version": "3.5.15",
   "private": false,
   "description": "Lyonir Studio custom nodes for ComfyUI",
   "lyonir": {
@@ -37,8 +37,8 @@
     "saveVideoGallery": {
       "node": "Lyonir_SaveVideo",
       "displayName": "🐺 Lyonir Save Video",
-      "input": "exact installed VHS_VideoCombine inputs + Lyonir bit_depth",
-      "encoding": "delegated directly to the installed VHS_VideoCombine; no parallel Lyonir encoder",
+      "input": "VideoCombine-compatible inputs + Lyonir bit_depth",
+      "encoding": "Internal compatibility encoder; packaged FFmpeg; no external VideoHelperSuite required",
       "storage": "Video Combine master output + persistent per-node UUID-keyed Lyonir history manifest + gallery thumbnails/proxies when needed",
       "ui": "Video Combine-dominant preview: the current video fills essentially the full usable node width; prior-video history remains a deliberately small strip below it.",
       "videoOutput": "same VHS_FILENAMES return contract as Video Combine",

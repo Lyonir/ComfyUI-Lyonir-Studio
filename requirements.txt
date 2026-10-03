@@ -3,3 +3,5 @@
 opencv-python>=4.8
 numpy
 Pillow
+
+imageio-ffmpeg>=0.6.0; platform_system != "Windows"
