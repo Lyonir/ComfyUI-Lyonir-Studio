@@ -39,7 +39,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Lyonir_SaveVideo": "🐺 Lyonir Save Video",
 }
 
-__version__ = "3.5.16"
+__version__ = "3.5.17"
 
 print(f"[Lyonir Studio] v{__version__} loaded")
 

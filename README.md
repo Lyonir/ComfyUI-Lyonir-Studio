@@ -2,7 +2,11 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.16**.
+Current public version: **v3.5.17**.
+
+## Selected video details in v3.5.17
+
+Lyonir Save Video shows recorded generation seed(s) and actual resolution below the controls, above the clean video preview. Select a history thumbnail to inspect that video. Use **Copiar seed** to copy its seed exactly, including long 64-bit values. Videos saved before this feature, imported media, or unresolvable seed providers show **Unavailable** instead of the current workflow seed. Export behavior is unchanged.
 
 ## Sampler total progress in v3.5.16
 

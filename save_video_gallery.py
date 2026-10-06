@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from .video_metadata import generation_seeds
+
 import importlib
 import inspect
 import json
@@ -130,6 +132,7 @@ def _public_entry(entry: dict[str, Any]) -> dict[str, Any]:
         "format": str(entry.get("format", "") or ""),
         "bit_depth": str(entry.get("bit_depth", "Auto (format)") or "Auto (format)"),
         "actual_bit_depth": str(entry.get("actual_bit_depth", "") or ""),
+        "generation_seeds": [str(value) for value in entry.get("generation_seeds", [])],
         "width": int(entry.get("width", 0) or 0),
         "height": int(entry.get("height", 0) or 0),
         "duration": float(entry.get("duration", 0.0) or 0.0),
@@ -861,6 +864,7 @@ class LyonirSaveVideo:
             vhs_cls=vhs_cls,
         )
         if entry is not None:
+            entry["generation_seeds"] = generation_seeds(prompt, unique_id)
             requested_depth = _requested_depth(str(bit_depth))
             actual_depth = _requested_depth(str(entry.get("actual_bit_depth", "")))
             if requested_depth is not None and actual_depth is not None:

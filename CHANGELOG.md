@@ -1,3 +1,10 @@
+# v3.5.17
+
+- Save Video records upstream generation seeds in per-video history.
+- Selected video seed and real resolution appear below save_output without covering the preview.
+- Copiar seed copies the selected seed without losing 64-bit digits and confirms success.
+- Existing history without recorded seeds remains usable and displays Unavailable.
+
 # v3.5.16
 
 Lyonir Sampler now reports one monotonic total progress across sampling, video decoding, cropping and audio decoding. Native preview images are preserved. No sampling parameters or output processing changed.

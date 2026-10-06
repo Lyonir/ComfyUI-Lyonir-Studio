@@ -1,6 +1,6 @@
 [project]
 name = "comfyui-lyonir-studio"
-version = "3.5.16"
+version = "3.5.17"
 description = "Lyonir Studio nodes for ComfyUI: multi-model sampler, resolution, image comparison, persistent image/video galleries and Qwen3-TTS."
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
