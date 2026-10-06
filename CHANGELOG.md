@@ -1,3 +1,10 @@
+# v3.5.18
+
+- Save Image displays selected image generation seed and actual resolution above the clean preview.
+- Copiar seed copies the selected generation seed with exact 64-bit precision.
+- Each Save Image node has a persistent independent gallery identity; cloned nodes receive a fresh identity.
+- Legacy shared histories are not imported; existing image files remain saved.
+
 # v3.5.17
 
 - Save Video records upstream generation seeds in per-video history.

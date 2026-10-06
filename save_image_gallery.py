@@ -4,6 +4,7 @@ import json
 import os
 import re
 import time
+import uuid
 from pathlib import Path
 from typing import Any
 
@@ -11,6 +12,7 @@ import folder_paths
 from aiohttp import web
 from nodes import SaveImage
 from server import PromptServer
+from .video_metadata import generation_seeds
 
 
 _HISTORY_DIRNAME = ".lyonir_gallery"
@@ -105,6 +107,9 @@ def _public_entry(entry: dict[str, Any]) -> dict[str, Any]:
         "subfolder": _safe_subfolder(entry.get("subfolder", "")),
         "type": "output",
         "timestamp": float(entry.get("timestamp", 0.0) or 0.0),
+        "width": entry.get("width", 0),
+        "height": entry.get("height", 0),
+        "generation_seeds": [str(seed) for seed in entry.get("generation_seeds", [])],
     }
 
 
@@ -137,6 +142,9 @@ def _append_history(node_id: Any, saved_images: list[dict[str, Any]]) -> None:
                 "subfolder": _safe_subfolder(info.get("subfolder", "")),
                 "type": "output",
                 "timestamp": now + index * 0.000001,
+                "width": info.get("width", 0),
+                "height": info.get("height", 0),
+                "generation_seeds": info.get("generation_seeds", []),
             }
         )
     entries.sort(key=lambda item: float(item.get("timestamp", 0.0) or 0.0), reverse=True)
@@ -144,6 +152,16 @@ def _append_history(node_id: Any, saved_images: list[dict[str, Any]]) -> None:
     data["node_id"] = str(node_id)
     data["entries"] = entries[:_MAX_MANIFEST_ENTRIES]
     _save_manifest(node_id, data)
+
+
+def _image_history_id(extra_pnginfo, unique_id):
+    workflow = extra_pnginfo.get("workflow", {}) if isinstance(extra_pnginfo, dict) else {}
+    for node in workflow.get("nodes", []) if isinstance(workflow, dict) else []:
+        if isinstance(node, dict) and str(node.get("id")) == str(unique_id):
+            properties = node.get("properties", {})
+            if isinstance(properties, dict):
+                return str(properties.get("lyonir_image_history_id") or "").strip()
+    return ""
 
 
 class LyonirSaveImage(SaveImage):
@@ -206,6 +224,13 @@ class LyonirSaveImage(SaveImage):
         extra_pnginfo=None,
         unique_id=None,
     ):
+        history_key = _image_history_id(extra_pnginfo, unique_id)
+        if not history_key:
+            # API clients without a workflow receive isolated instance history.
+            # Never fall back to a numeric node ID shared by unrelated workflows.
+            if not getattr(self, "_image_history_key", None):
+                self._image_history_key = str(uuid.uuid4())
+            history_key = self._image_history_key
         safe_prefix = _safe_prefix(filename_prefix)
         safe_subfolder = _safe_subfolder(subfolder)
         combined_prefix = f"{safe_subfolder}/{safe_prefix}" if safe_subfolder else safe_prefix
@@ -218,9 +243,13 @@ class LyonirSaveImage(SaveImage):
         )
         saved_images = list(saved.get("ui", {}).get("images", []))
 
+        seeds = generation_seeds(prompt, unique_id, "image")
+        for info in saved_images:
+            info.update(width=int(image.shape[2]), height=int(image.shape[1]), generation_seeds=seeds)
+
         try:
-            _append_history(unique_id, saved_images)
-            history = _get_history(unique_id, history_limit)
+            _append_history(history_key, saved_images)
+            history = _get_history(history_key, history_limit)
         except Exception as exc:
             # Saving the image is the critical operation. A gallery bookkeeping
             # failure must never throw away a successful render.
@@ -232,6 +261,7 @@ class LyonirSaveImage(SaveImage):
                 "lyonir_gallery_current": saved_images,
                 "lyonir_gallery_history": history,
                 "lyonir_gallery_node_id": [str(unique_id)],
+                "lyonir_gallery_history_id": [history_key],
             },
             "result": (image,),
         }
@@ -239,7 +269,9 @@ class LyonirSaveImage(SaveImage):
 
 @PromptServer.instance.routes.get("/lyonir/save-image/history")
 async def lyonir_save_image_history(request):
-    node_id = request.query.get("node_id", "unknown")
+    node_id = request.query.get("history_id", "").strip()
+    if not node_id:
+        return web.json_response({"ok": True, "history": []})
     try:
         limit = int(request.query.get("limit", "18"))
     except Exception:

@@ -1,5 +1,5 @@
 """Capture upstream sampler seeds from the executed API prompt, as exact strings."""
-def generation_seeds(prompt, save_node_id):
+def generation_seeds(prompt, save_node_id, image_input="images"):
     if not isinstance(prompt, dict):
         return []
     graph = {str(k): v for k, v in prompt.items() if isinstance(v, dict)}
@@ -29,7 +29,7 @@ def generation_seeds(prompt, save_node_id):
             return str(int(value))
         return None
 
-    start = graph.get(str(save_node_id), {}).get('inputs', {}).get('images')
+    start = graph.get(str(save_node_id), {}).get('inputs', {}).get(image_input)
     pending = [str(start[0])] if link(start) else []
     seen, seeds = set(), []
     while pending:

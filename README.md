@@ -2,7 +2,9 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.17**.
+Current public version: **v3.5.18**.
+
+Save Image now shows the selected image resolution and recorded generation seed above the clean preview, with **Copiar seed**. Existing images without recorded seeds show Unavailable; their dimensions are read when loaded. For a batch, the seed is the sampler generation seed, not an inferred per-image seed. 
 
 ## Selected video details in v3.5.17
 
@@ -229,3 +231,5 @@ Model weights, third-party packages, voice data and upstream projects may have t
 - Portfolio: https://lyonirstudios.myportfolio.com/
 
 
+
+Save Image histories now use a persistent identity per node. New and cloned nodes start separate histories; saving and reopening the workflow keeps its identity. Legacy numeric-ID histories are not imported because their ownership is ambiguous. Existing image files are retained.
