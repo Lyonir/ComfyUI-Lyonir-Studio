@@ -361,12 +361,14 @@ function createGallery(node) {
     });
 
     video.addEventListener("loadedmetadata", () => {
+        updateGenerationInfo(true);
         if (video.videoWidth > 0 && video.videoHeight > 0) {
             setPreviewAspectRatio(video.videoWidth / video.videoHeight, true);
         }
     });
 
     image.addEventListener("load", () => {
+        updateGenerationInfo(true);
         if (image.naturalWidth > 0 && image.naturalHeight > 0) {
             setPreviewAspectRatio(image.naturalWidth / image.naturalHeight, true);
         }
@@ -431,7 +433,82 @@ function createGallery(node) {
     });
     thumbControl.append(thumbSlider);
 
-    root.append(previewWrap, historyStrip, thumbControl);
+    const generationInfo = document.createElement("div");
+    generationInfo.dataset.lyonirGenerationInfo = "1";
+    Object.assign(generationInfo.style, {
+        position: "relative", width: "100%", height: "40px",
+        boxSizing: "border-box", padding: "2px 6px", fontSize: "12px",
+        lineHeight: "18px", color: "inherit", background: "transparent",
+        overflow: "hidden", display: "none",
+    });
+    const seedRow = document.createElement("div");
+    Object.assign(seedRow.style, { display: "flex", alignItems: "center", gap: "6px", height: "18px" });
+    const seedLabel = document.createElement("span");
+    Object.assign(seedLabel.style, { minWidth: "0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" });
+    const copySeedButton = document.createElement("button");
+    copySeedButton.type = "button";
+    copySeedButton.textContent = "Copiar seed";
+    copySeedButton.setAttribute("aria-label", "Copiar seed do vídeo selecionado");
+    Object.assign(copySeedButton.style, {
+        flexShrink: "0", padding: "0 4px", fontSize: "11px", lineHeight: "16px",
+        height: "18px", border: "1px solid #777", borderRadius: "3px",
+        color: "inherit", background: "transparent", cursor: "pointer",
+    });
+    const resolutionLabel = document.createElement("div");
+    seedRow.append(seedLabel, copySeedButton);
+    generationInfo.append(seedRow, resolutionLabel);
+    let copySeedTimer = null;
+    let copySeedRevision = 0;
+
+    function resetCopySeedFeedback() {
+        copySeedRevision++;
+        clearTimeout(copySeedTimer);
+        copySeedButton.textContent = "Copiar seed";
+    }
+
+    for (const eventName of ["pointerdown", "pointermove", "pointerup", "dblclick", "contextmenu", "wheel"]) {
+        copySeedButton.addEventListener(eventName, (event) => event.stopPropagation());
+    }
+    copySeedButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const seeds = Array.isArray(selected?.generation_seeds) ? selected.generation_seeds : [];
+        if (!seeds.length) return;
+        resetCopySeedFeedback();
+        const revision = copySeedRevision;
+        // Keep seeds as strings: converting 64-bit seeds to JS Number loses digits.
+        const text = seeds.map(String).join(", ");
+        try {
+            await navigator.clipboard.writeText(text);
+            if (revision !== copySeedRevision) return;
+            copySeedButton.textContent = "Copiado!";
+        } catch (error) {
+            if (revision !== copySeedRevision) return;
+            copySeedButton.textContent = "Falhou";
+            console.warn("[Lyonir Save Video] Could not copy seed", error);
+        }
+        copySeedTimer = setTimeout(() => {
+            if (revision === copySeedRevision) copySeedButton.textContent = "Copiar seed";
+        }, 1800);
+    });
+
+    function updateGenerationInfo(useLoadedSize = false) {
+        resetCopySeedFeedback();
+        generationInfo.style.display = selected ? "block" : "none";
+        const seeds = Array.isArray(selected?.generation_seeds) ? selected.generation_seeds : [];
+        copySeedButton.disabled = !seeds.length;
+        copySeedButton.title = seeds.length ? "Copiar seed do vídeo selecionado" : "Seed indisponível neste vídeo";
+        if (!selected) { seedLabel.textContent = ""; resolutionLabel.textContent = ""; return; }
+        const width = Number(selected.width) || (useLoadedSize ? (selected.is_image ? image.naturalWidth : video.videoWidth) : 0);
+        const height = Number(selected.height) || (useLoadedSize ? (selected.is_image ? image.naturalHeight : video.videoHeight) : 0);
+        const seedText = seeds.length ? seeds.join(", ") : "Unavailable";
+        const sizeText = width && height ? `${width} × ${height}` : "Unavailable";
+        seedLabel.textContent = `Seed: ${seedText}`;
+        seedLabel.title = seedLabel.textContent;
+        resolutionLabel.textContent = `Resolution: ${sizeText}`;
+    }
+
+    root.append(generationInfo, previewWrap, historyStrip, thumbControl);
 
     node.properties ??= {};
     let history = [];
@@ -473,7 +550,7 @@ function createGallery(node) {
     function computeWidgetSize(width) {
         const widgetWidth = Math.max(1, Number(width) || Number(node?.size?.[0]) || BASE_NODE_WIDTH);
         const ratio = selectedAspectRatio();
-        const stripHeight = historyHeight();
+        const stripHeight = historyHeight() + (selected ? 40 : 0);
         if (hiddenPreview) return [widgetWidth, stripHeight || -4];
         if (!selected || !ratio) return [widgetWidth, stripHeight || -4];
 
@@ -706,6 +783,7 @@ function createGallery(node) {
     function selectEntry(entry) {
         pauseCurrent();
         selected = entry || null;
+        updateGenerationInfo();
         previewAspectRatio = null;
         if (selected?.width && selected?.height) {
             const ratio = Number(selected.width) / Number(selected.height);
@@ -808,6 +886,7 @@ function createGallery(node) {
     syncLayout();
 
     function destroy() {
+        resetCopySeedFeedback();
         pauseCurrent();
         video.removeAttribute("src");
         image.removeAttribute("src");
