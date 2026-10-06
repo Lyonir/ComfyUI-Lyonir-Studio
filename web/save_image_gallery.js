@@ -6,6 +6,37 @@ const BASE_NODE_WIDTH = 300;
 const BASE_NODE_HEIGHT = 420;
 const BASE_THUMB_SIZE = 36;
 
+function newHistoryId() {
+    try {
+        if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+    } catch (_) {}
+    return `lyonir-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}-${Math.random().toString(36).slice(2)}`;
+}
+
+function ensureHistoryIdentity(node, forceNew = false) {
+    if (!node) return "";
+    node.properties ??= {};
+    let value = String(node.properties.lyonir_image_history_id || "").trim();
+    if (forceNew || !value) {
+        value = newHistoryId();
+        node.properties.lyonir_image_history_id = value;
+        node.graph?.setDirtyCanvas?.(true, true);
+        node.graph?.change?.();
+    }
+    return value;
+}
+
+function dedupeHistoryIdentity(node) {
+    const current = ensureHistoryIdentity(node);
+    if (!current) return current;
+    const nodes = node?.graph?._nodes || [];
+    const duplicate = nodes.find((other) =>
+        other && other !== node && other.type === NODE_CLASS &&
+        String(other?.properties?.lyonir_image_history_id || "").trim() === current
+    );
+    return duplicate ? ensureHistoryIdentity(node, true) : current;
+}
+
 function imageUrl(info, cacheBust = true) {
     if (!info) return "";
     const params = new URLSearchParams();
@@ -166,7 +197,82 @@ function createGallery(node) {
         background: "transparent",
     });
 
-    root.append(previewWrap, toolbar, thumbs);
+    const generationInfo = document.createElement("div");
+    generationInfo.dataset.lyonirGenerationInfo = "1";
+    Object.assign(generationInfo.style, {
+        position: "relative", width: "100%", height: "40px", flex: "0 0 40px",
+        boxSizing: "border-box", padding: "2px 6px", fontSize: "12px",
+        lineHeight: "18px", color: "inherit", background: "transparent",
+        overflow: "hidden", display: "none",
+    });
+    const seedRow = document.createElement("div");
+    Object.assign(seedRow.style, { display: "flex", alignItems: "center", gap: "6px", height: "18px" });
+    const seedLabel = document.createElement("span");
+    Object.assign(seedLabel.style, { minWidth: "0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" });
+    const copySeedButton = document.createElement("button");
+    copySeedButton.type = "button";
+    copySeedButton.textContent = "Copiar seed";
+    copySeedButton.setAttribute("aria-label", "Copiar seed da imagem selecionada");
+    Object.assign(copySeedButton.style, {
+        flexShrink: "0", padding: "0 4px", fontSize: "11px", lineHeight: "16px",
+        height: "18px", border: "1px solid #777", borderRadius: "3px",
+        color: "inherit", background: "transparent", cursor: "pointer",
+    });
+    const resolutionLabel = document.createElement("div");
+    seedRow.append(seedLabel, copySeedButton);
+    generationInfo.append(seedRow, resolutionLabel);
+    let copySeedTimer = null;
+    let copySeedRevision = 0;
+
+    function resetCopySeedFeedback() {
+        copySeedRevision++;
+        clearTimeout(copySeedTimer);
+        copySeedButton.textContent = "Copiar seed";
+    }
+
+    for (const eventName of ["pointerdown", "pointermove", "pointerup", "dblclick", "contextmenu", "wheel"]) {
+        copySeedButton.addEventListener(eventName, (event) => event.stopPropagation());
+    }
+    copySeedButton.addEventListener("click", async (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        const seeds = Array.isArray(selected?.generation_seeds) ? selected.generation_seeds : [];
+        if (!seeds.length) return;
+        resetCopySeedFeedback();
+        const revision = copySeedRevision;
+        // Keep seeds as strings: converting 64-bit seeds to JS Number loses digits.
+        const text = seeds.map(String).join(", ");
+        try {
+            await navigator.clipboard.writeText(text);
+            if (revision !== copySeedRevision) return;
+            copySeedButton.textContent = "Copiado!";
+        } catch (error) {
+            if (revision !== copySeedRevision) return;
+            copySeedButton.textContent = "Falhou";
+            console.warn("[Lyonir Save Image] Could not copy seed", error);
+        }
+        copySeedTimer = setTimeout(() => {
+            if (revision === copySeedRevision) copySeedButton.textContent = "Copiar seed";
+        }, 1800);
+    });
+
+    function updateGenerationInfo(useLoadedSize = false) {
+        resetCopySeedFeedback();
+        generationInfo.style.display = selected ? "block" : "none";
+        const seeds = Array.isArray(selected?.generation_seeds) ? selected.generation_seeds : [];
+        copySeedButton.disabled = !seeds.length;
+        copySeedButton.title = seeds.length ? "Copiar seed da imagem selecionada" : "Seed indisponível nesta imagem";
+        if (!selected) { seedLabel.textContent = ""; resolutionLabel.textContent = ""; return; }
+        const width = Number(selected.width) || (useLoadedSize ? preview.naturalWidth : 0);
+        const height = Number(selected.height) || (useLoadedSize ? preview.naturalHeight : 0);
+        const seedText = seeds.length ? seeds.join(", ") : "Unavailable";
+        const sizeText = width && height ? `${width} × ${height}` : "Unavailable";
+        seedLabel.textContent = `Seed: ${seedText}`;
+        seedLabel.title = seedLabel.textContent;
+        resolutionLabel.textContent = `Resolution: ${sizeText}`;
+    }
+
+    root.append(generationInfo, previewWrap, toolbar, thumbs);
     previewWrap.append(preview);
 
     let history = [];
@@ -311,14 +417,18 @@ function createGallery(node) {
 
     function selectEntry(entry) {
         selected = entry || null;
+        updateGenerationInfo();
         if (!selected) {
             preview.removeAttribute("src");
             preview.style.display = "none";
             renderThumbs();
             return;
         }
+        const loadingEntry = selected;
         preview.onload = () => {
+            if (selected !== loadingEntry) return;
             preview.style.display = "block";
+            updateGenerationInfo(true);
         };
         preview.onerror = () => {
             preview.style.display = "none";
@@ -366,8 +476,7 @@ function createGallery(node) {
                 selectEntry(entry);
             });
             button.addEventListener("contextmenu", (e) => {
-                selected = entry;
-                renderThumbs();
+                selectEntry(entry);
                 showComfyNodeMenu(e);
             });
             thumbs.append(button);
@@ -391,14 +500,15 @@ function createGallery(node) {
     }
 
     async function fetchHistory() {
+        const historyId = dedupeHistoryIdentity(node);
         const nodeId = node?.id;
         if (nodeId == null || nodeId === -1) return;
         const limit = Math.max(4, Math.min(100, Number(getWidgetValue(node, "history_limit", 18)) || 18));
-        const params = new URLSearchParams({ node_id: String(nodeId), limit: String(limit) });
+        const params = new URLSearchParams({ history_id: historyId, limit: String(limit) });
         try {
             const response = await fetch(api.apiURL(`/lyonir/save-image/history?${params.toString()}`), { cache: "no-store" });
             const data = await response.json();
-            if (data?.ok) setHistory(data.history || []);
+            if (data?.ok && ensureHistoryIdentity(node) === historyId) setHistory(data.history || []);
         } catch (error) {
             console.warn("[Lyonir Save Image] history refresh failed", error);
         }
@@ -440,6 +550,7 @@ function createGallery(node) {
     syncLayout();
 
     function destroy() {
+        resetCopySeedFeedback();
         resizeObserver?.disconnect?.();
         resizeObserver = null;
     }
@@ -470,6 +581,7 @@ app.registerExtension({
         const originalCreated = nodeType.prototype.onNodeCreated;
         nodeType.prototype.onNodeCreated = function () {
             originalCreated?.apply(this, arguments);
+            ensureHistoryIdentity(this);
             const gallery = createGallery(this);
             this.__lyonirSaveImageGallery = gallery;
 
@@ -481,8 +593,8 @@ app.registerExtension({
                     serialize: false,
                     hideOnZoom: false,
                     margin: 0,
-                    getMinHeight: () => 170,
-                    getHeight: () => 240,
+                    getMinHeight: () => 210,
+                    getHeight: () => 280,
                     afterResize: () => gallery.syncLayout(),
                 },
             );
@@ -501,6 +613,7 @@ app.registerExtension({
         const originalGraphConfigured = nodeType.prototype.onGraphConfigured;
         nodeType.prototype.onGraphConfigured = function () {
             originalGraphConfigured?.apply(this, arguments);
+            dedupeHistoryIdentity(this);
             this.properties ??= {};
             if (this.properties.lyonir_gallery_layout !== "3.4.4") {
                 const w = Number(this.size?.[0]) || 0;
@@ -517,6 +630,18 @@ app.registerExtension({
                 this.__lyonirSaveImageGallery?.syncLayout();
                 this.__lyonirSaveImageGallery?.fetchHistory();
             }, 0);
+        };
+
+        const originalClone = nodeType.prototype.clone;
+        nodeType.prototype.clone = function () {
+            const copy = originalClone?.apply(this, arguments);
+            if (copy) ensureHistoryIdentity(copy, true);
+            return copy;
+        };
+        const originalAdded = nodeType.prototype.onAdded;
+        nodeType.prototype.onAdded = function () {
+            originalAdded?.apply(this, arguments);
+            setTimeout(() => dedupeHistoryIdentity(this), 0);
         };
 
         const originalExtraMenu = nodeType.prototype.getExtraMenuOptions;
