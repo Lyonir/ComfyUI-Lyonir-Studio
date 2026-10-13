@@ -655,10 +655,19 @@ app.registerExtension({
                 { content: "MaskEditor", callback: () => gallery.openMaskEditor(this) },
             ] : [];
 
-            if (Array.isArray(inherited) && inherited.length) {
-                return imageItems.length ? [...imageItems, null, ...inherited] : inherited;
+            // Some frontend menu builders ignore the returned array and only
+            // consume the options argument. Populate that array directly.
+            if (Array.isArray(options)) {
+                const inheritedItems = Array.isArray(inherited)
+                    ? inherited.filter((item) => item && !options.includes(item))
+                    : [];
+                const additions = [...imageItems, ...inheritedItems];
+                if (additions.length) options.unshift(...additions, null);
+                // Avoid duplicate items in LiteGraph versions that also append
+                // the return value to the mutated options array.
+                return [];
             }
-            return imageItems;
+            return [...imageItems, ...(Array.isArray(inherited) ? inherited : [])];
         };
 
         const originalExecuted = nodeType.prototype.onExecuted;

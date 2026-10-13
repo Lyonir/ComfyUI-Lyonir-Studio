@@ -1,3 +1,8 @@
+# v3.5.19
+
+- Fix Save Image context-menu actions in frontends that consume the options array directly.
+- Save Image downloads the selected gallery image; other nodes are unchanged.
+
 # v3.5.18
 
 - Save Image displays selected image generation seed and actual resolution above the clean preview.
