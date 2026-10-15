@@ -1,3 +1,8 @@
+# v3.5.20
+
+- Correct Image Compare labels: B on the revealed left side, A on the right. Moving the wipe left to right progressively reveals B.
+- Preserve input mapping, comparison behavior and all other nodes.
+
 # v3.5.19
 
 - Fix Save Image context-menu actions in frontends that consume the options array directly.

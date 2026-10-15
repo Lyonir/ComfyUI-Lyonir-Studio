@@ -158,8 +158,9 @@ function createComparer(node) {
         return label;
     };
 
-    const labelA = makeLabel("A", "left");
-    const labelB = makeLabel("B", "right");
+    // B is revealed from left to right over A; labels follow the visible sides.
+    const labelA = makeLabel("A", "right");
+    const labelB = makeLabel("B", "left");
 
     root.append(imageA, imageB, divider, handle, labelA, labelB);
 

@@ -44,3 +44,5 @@ Video metadata validation: tests passed for final-sampler selection, seed zero, 
 3.5.18 validation: Save Image batch saving, actual dimensions, exact seed strings, persisted history, isolated nodes sharing a numeric ID, fresh clone identities, workflow identity reload, old missing metadata, clipboard success and failure, and syntax checks passed. User tested the updated pack and approved publication. Save Video encoding and Sampler behavior are unchanged.
 
 3.5.19 validation: menu mutation, inherited menus, single Save Image action, empty-gallery behavior, selected-image callback and download link checks passed. JavaScript syntax passed. The user installed the test pack in ComfyUI and confirmed that it works.
+
+3.5.20 validation: frontend simulation verified actual A/B input mapping, wipe positions at 0/25/50/75/100 percent, divider and label positions. JavaScript syntax passed. Only Image Compare labels and release metadata changed from 3.5.19.
