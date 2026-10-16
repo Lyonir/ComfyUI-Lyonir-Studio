@@ -1,3 +1,8 @@
+# v3.5.21
+
+- Remove stale format widgets before creating replacements to prevent #1 suffixes in Save Video.
+- Keep preset labels readable while preserving input handling and saved values.
+
 # v3.5.20
 
 - Correct Image Compare labels: B on the revealed left side, A on the right. Moving the wipe left to right progressively reveals B.

@@ -46,3 +46,5 @@ Video metadata validation: tests passed for final-sampler selection, seed zero, 
 3.5.19 validation: menu mutation, inherited menus, single Save Image action, empty-gallery behavior, selected-image callback and download link checks passed. JavaScript syntax passed. The user installed the test pack in ComfyUI and confirmed that it works.
 
 3.5.20 validation: frontend simulation verified actual A/B input mapping, wipe positions at 0/25/50/75/100 percent, divider and label positions. JavaScript syntax passed. Only Image Compare labels and release metadata changed from 3.5.19.
+
+3.5.21 validation: simulated name-deduplicating widget constructors passed repeated rebuilds, clean names and labels, format switching, input cleanup and named-value restore (CRF 7, 10-bit pixel format and metadata disabled). JavaScript syntax passed. Live ComfyUI visual validation was not performed for this change.

@@ -137,6 +137,10 @@ function addFormatWidgets(nodeType, nodeData) {
         function rebuildFormatWidgets(value) {
             const definitions = formats?.[value] || [];
             const newWidgets = [];
+            // Release the previous names before constructing replacements.
+            // Modern frontends otherwise rename overlapping widgets with #1.
+            const removed = node.widgets.splice(formatWidgetIndex, formatWidgetsCount);
+            for (const widget of removed) widget?.onRemove?.();
 
             for (const definition of definitions) {
                 if (!Array.isArray(definition) || definition.length < 2) continue;
@@ -150,14 +154,16 @@ function addFormatWidgets(nodeType, nodeData) {
                 constructor(node, definition[0], definition.slice(1), app);
                 const widget = node.widgets.pop();
                 if (!widget) continue;
+                // Keep the preset's public label even if the frontend reserves
+                // an internal name while restoring a connected input.
+                widget.label = definition[0];
                 widget.config = definition.slice(1);
                 newWidgets.push(widget);
             }
 
-            const removed = node.widgets.splice(formatWidgetIndex, formatWidgetsCount, ...newWidgets);
+            node.widgets.splice(formatWidgetIndex, 0, ...newWidgets);
             const newNames = new Set(newWidgets.map((widget) => widget.name));
             for (const widget of removed) {
-                widget?.onRemove?.();
                 if (newNames.has(widget.name)) continue;
                 const inputIndex = node.inputs?.findIndex?.((input) => input.name === widget.name) ?? -1;
                 if (inputIndex >= 0) node.removeInput?.(inputIndex);
