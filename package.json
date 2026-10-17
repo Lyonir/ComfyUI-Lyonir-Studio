@@ -1,6 +1,6 @@
 {
   "name": "comfyui-lyonir-studio",
-  "version": "3.5.22",
+  "version": "3.5.23",
   "private": false,
   "description": "Lyonir Studio custom nodes for ComfyUI",
   "lyonir": {

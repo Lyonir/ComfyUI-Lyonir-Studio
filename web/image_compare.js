@@ -139,30 +139,7 @@ function createComparer(node) {
         zIndex: "6",
     });
 
-    const makeLabel = (text, side) => {
-        const label = document.createElement("div");
-        label.textContent = text;
-        Object.assign(label.style, {
-            position: "absolute",
-            top: "8px",
-            [side]: "8px",
-            padding: "2px 6px",
-            borderRadius: "4px",
-            background: "rgba(0,2,16,0.64)",
-            color: "#e3e3e3",
-            font: "600 10px Inter, system-ui, sans-serif",
-            pointerEvents: "none",
-            zIndex: "7",
-            display: "none",
-        });
-        return label;
-    };
-
-    // B is revealed from right to left over A.
-    const labelA = makeLabel("A", "left");
-    const labelB = makeLabel("B", "right");
-
-    root.append(imageA, imageB, divider, handle, labelA, labelB);
+    root.append(imageA, imageB, divider, handle);
 
     let readyA = false;
     let readyB = false;
@@ -198,8 +175,6 @@ function createComparer(node) {
         imageB.style.display = readyB ? "block" : "none";
         divider.style.display = ready ? "block" : "none";
         handle.style.display = ready ? "flex" : "none";
-        labelA.style.display = ready ? "block" : "none";
-        labelB.style.display = ready ? "block" : "none";
     }
 
     function loadImage(img, info, which) {

@@ -1,3 +1,8 @@
+# v3.5.23
+
+- Remove A/B badges from Image Compare preview.
+- Preserve right-to-left wipe and workflow preview restoration.
+
 # v3.5.22
 
 - Restore Image Compare A/B preview references and wipe position after workflow recreation.
