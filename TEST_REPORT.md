@@ -48,3 +48,5 @@ Video metadata validation: tests passed for final-sampler selection, seed zero, 
 3.5.20 validation: frontend simulation verified actual A/B input mapping, wipe positions at 0/25/50/75/100 percent, divider and label positions. JavaScript syntax passed. Only Image Compare labels and release metadata changed from 3.5.19.
 
 3.5.21 validation: simulated name-deduplicating widget constructors passed repeated rebuilds, clean names and labels, format switching, input cleanup and named-value restore (CRF 7, 10-bit pixel format and metadata disabled). JavaScript syntax passed. Live ComfyUI visual validation was not performed for this change.
+
+3.5.22 validation: simulated right-to-left reveal endpoints, A/B labels, workflow serialization and preview restore, saved wipe position and unrelated empty workflow isolation passed. Python and JavaScript syntax passed. The user installed the complete test pack and confirmed correct behavior in ComfyUI, including the requested fixes. Release Image Compare code is identical to the accepted test pack.

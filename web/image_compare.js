@@ -101,7 +101,7 @@ function createComparer(node) {
 
     const imageA = makeImg();
     const imageB = makeImg();
-    imageB.style.clipPath = "inset(0 50% 0 0)";
+    imageB.style.clipPath = "inset(0 0 0 50%)";
 
     const divider = document.createElement("div");
     Object.assign(divider.style, {
@@ -158,9 +158,9 @@ function createComparer(node) {
         return label;
     };
 
-    // B is revealed from left to right over A; labels follow the visible sides.
-    const labelA = makeLabel("A", "right");
-    const labelB = makeLabel("B", "left");
+    // B is revealed from right to left over A.
+    const labelA = makeLabel("A", "left");
+    const labelB = makeLabel("B", "right");
 
     root.append(imageA, imageB, divider, handle, labelA, labelB);
 
@@ -185,7 +185,9 @@ function createComparer(node) {
     function setReveal(value) {
         reveal = Math.max(0, Math.min(1, value));
         const pct = reveal * 100;
-        imageB.style.clipPath = `inset(0 ${100 - pct}% 0 0)`;
+        imageB.style.clipPath = `inset(0 0 0 ${pct}%)`;
+        node.properties ??= {};
+        node.properties.lyonir_compare_reveal = reveal;
         divider.style.left = `${pct}%`;
         handle.style.left = `${pct}%`;
     }
@@ -215,10 +217,17 @@ function createComparer(node) {
         img.src = imageUrl(info);
     }
 
-    function updateFromOutput(output) {
+    function updateFromOutput(output, restoring = false) {
         const a = output?.lyonir_compare_a?.[0];
         const b = output?.lyonir_compare_b?.[0];
         if (!a || !b) return;
+        // Store only file references, never image pixels, in this workflow.
+        // Numeric node IDs alone cannot safely identify previews across tabs.
+        node.properties ??= {};
+        node.properties.lyonir_compare_preview = {
+            a: { filename: a.filename, subfolder: a.subfolder || "", type: a.type || "temp" },
+            b: { filename: b.filename, subfolder: b.subfolder || "", type: b.type || "temp" },
+        };
         aInfo = a;
         bInfo = b;
         readyA = false;
@@ -226,7 +235,8 @@ function createComparer(node) {
         updateVisibility();
         loadImage(imageA, a, "a");
         loadImage(imageB, b, "b");
-        setReveal(0.5);
+        const savedReveal = node.properties.lyonir_compare_reveal;
+        setReveal(restoring && Number.isFinite(savedReveal) ? savedReveal : 0.5);
     }
 
     function pointerRatio(e) {
@@ -243,9 +253,10 @@ function createComparer(node) {
 
     function activeInfo() {
         if (readyA && readyB) {
-            // Image B is the clipped overlay on the LEFT side of the divider;
-            // image A is visible on the RIGHT side.
-            return lastPointerRatio <= reveal ? bInfo : aInfo;
+            // B is on the right of the divider; A is on the left.
+            if (reveal <= 0) return bInfo;
+            if (reveal >= 1) return aInfo;
+            return lastPointerRatio >= reveal ? bInfo : aInfo;
         }
         if (readyB) return bInfo;
         if (readyA) return aInfo;
@@ -343,6 +354,12 @@ function createComparer(node) {
     return {
         root,
         updateFromOutput,
+        restore() {
+            const saved = node.properties?.lyonir_compare_preview;
+            if (saved?.a?.filename && saved?.b?.filename) {
+                updateFromOutput({ lyonir_compare_a: [saved.a], lyonir_compare_b: [saved.b] }, true);
+            }
+        },
         hasImage: () => Boolean(activeInfo()),
         openActive,
         copyActive,
@@ -384,6 +401,21 @@ app.registerExtension({
 
             const natural = this.computeSize?.();
             if (Array.isArray(natural) && natural.length >= 2) this.setSize?.(natural);
+        };
+
+        // Recreated nodes receive their own serialized workflow properties.
+        // Restore after configuration, not from a global numeric-node-ID cache.
+        const originalConfigured = nodeType.prototype.onConfigure;
+        nodeType.prototype.onConfigure = function () {
+            const result = originalConfigured?.apply(this, arguments);
+            this.__lyonirComparer?.restore();
+            return result;
+        };
+        const originalGraphConfigured = nodeType.prototype.onGraphConfigured;
+        nodeType.prototype.onGraphConfigured = function () {
+            const result = originalGraphConfigured?.apply(this, arguments);
+            this.__lyonirComparer?.restore();
+            return result;
         };
 
         // Add the same image-specific context actions users get on Save Image.

@@ -1,3 +1,9 @@
+# v3.5.22
+
+- Restore Image Compare A/B preview references and wipe position after workflow recreation.
+- Reveal B from right to left; labels and context actions follow visible sides.
+- Preview restoration requires the original ComfyUI temporary files to remain available.
+
 # v3.5.21
 
 - Remove stale format widgets before creating replacements to prevent #1 suffixes in Save Video.

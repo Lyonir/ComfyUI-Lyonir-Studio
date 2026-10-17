@@ -2,7 +2,7 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.21**.
+Current public version: **v3.5.22**.
 
 Save Image now shows the selected image resolution and recorded generation seed above the clean preview, with **Copiar seed**. Existing images without recorded seeds show Unavailable; their dimensions are read when loaded. For a batch, the seed is the sampler generation seed, not an inferred per-image seed. 
 
