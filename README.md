@@ -2,13 +2,13 @@
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
-Current public version: **v3.5.23**.
+Current public version: **v3.5.24**.
 
 Save Image now shows the selected image resolution and recorded generation seed above the clean preview, with **Copiar seed**. Existing images without recorded seeds show Unavailable; their dimensions are read when loaded. For a batch, the seed is the sampler generation seed, not an inferred per-image seed. 
 
 ## Selected video details in v3.5.17
 
-Lyonir Save Video shows recorded generation seed(s) and actual resolution below the controls, above the clean video preview. Select a history thumbnail to inspect that video. Use **Copiar seed** to copy its seed exactly, including long 64-bit values. Videos saved before this feature, imported media, or unresolvable seed providers show **Unavailable** instead of the current workflow seed. Export behavior is unchanged.
+Lyonir Save Video shows recorded generation seed(s), actual resolution, verified total frames, FPS, and duration below the controls, above the clean video preview. Frames are not shown on history thumbnails. Videos saved before the frame-count update are checked in the background (when supported by available FFmpeg/FFprobe tools). Select a history thumbnail to inspect that video. Use **Copiar seed** to copy its seed exactly, including long 64-bit values. Videos saved before this feature, imported media, or unresolvable seed providers show **Unavailable** instead of the current workflow seed. Export behavior is unchanged.
 
 ## Sampler total progress in v3.5.16
 

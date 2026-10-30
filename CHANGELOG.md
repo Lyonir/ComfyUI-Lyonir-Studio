@@ -1,3 +1,11 @@
+# v3.5.24
+
+- Integrate tested Save Video frame counting onto the existing v3.5.23 repository code.
+- Show verified total frames, FPS, and duration only in the selected video details (not on history thumbnails).
+- Check historical video frame counts asynchronously and preserve gallery playback, encoding, recent format-widget fixes, and Image Compare behavior.
+- Preserve all other nodes and packaged media binaries from v3.5.23.
+- Local code/synthetic-media checks completed; user ComfyUI validation pending.
+
 # v3.5.23
 
 - Remove A/B badges from Image Compare preview.

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from .video_metadata import generation_seeds
 
+import asyncio
 import importlib
 import inspect
 import json
@@ -10,6 +11,7 @@ import re
 import shutil
 import subprocess
 import time
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -24,6 +26,8 @@ _PREVIEW_DIRNAME = "previews"
 _MANIFEST_VERSION = 4
 _MAX_MANIFEST_ENTRIES = 500
 _HISTORY_LIMIT = 12
+_MANIFEST_LOCK = threading.RLock()
+_FRAME_PROBE_SEMAPHORE = asyncio.Semaphore(2)
 
 _BIT_DEPTHS = [
     "Auto (format)",
@@ -137,6 +141,8 @@ def _public_entry(entry: dict[str, Any]) -> dict[str, Any]:
         "height": int(entry.get("height", 0) or 0),
         "duration": float(entry.get("duration", 0.0) or 0.0),
         "frame_count": int(entry.get("frame_count", 0) or 0),
+        "frame_count_verified": bool(entry.get("frame_count_verified", False)),
+        "frame_count_checked": bool(entry.get("frame_count_checked", False)),
         "codec": str(entry.get("codec", "") or ""),
         "pixel_format": str(entry.get("pixel_format", "") or ""),
         "is_image": bool(entry.get("is_image", False)),
@@ -148,38 +154,41 @@ def _public_entry(entry: dict[str, Any]) -> dict[str, Any]:
 
 
 def _get_history(node_id: Any, limit: int = _HISTORY_LIMIT) -> list[dict[str, Any]]:
-    data = _load_manifest(node_id)
-    entries = [entry for entry in data.get("entries", []) if isinstance(entry, dict) and _entry_exists(entry)]
-    entries.sort(key=lambda item: float(item.get("timestamp", 0.0) or 0.0), reverse=True)
-    trimmed = entries[:_MAX_MANIFEST_ENTRIES]
-    if trimmed != data.get("entries", []):
-        data["entries"] = trimmed
-        try:
-            _save_manifest(node_id, data)
-        except Exception:
-            pass
-    return [_public_entry(entry) for entry in trimmed[: max(1, int(limit))]]
+    with _MANIFEST_LOCK:
+        data = _load_manifest(node_id)
+        entries = [entry for entry in data.get("entries", []) if isinstance(entry, dict) and _entry_exists(entry)]
+        entries.sort(key=lambda item: float(item.get("timestamp", 0.0) or 0.0), reverse=True)
+        trimmed = entries[:_MAX_MANIFEST_ENTRIES]
+        if trimmed != data.get("entries", []):
+            data["entries"] = trimmed
+            try:
+                _save_manifest(node_id, data)
+            except Exception:
+                pass
+        return [_public_entry(entry) for entry in trimmed[: max(1, int(limit))]]
 
 
 def _append_history(node_id: Any, entry: dict[str, Any]) -> None:
-    data = _load_manifest(node_id)
-    entries = [item for item in data.get("entries", []) if isinstance(item, dict)]
-    key = (
-        str(entry.get("type", "output")),
-        _safe_subfolder(entry.get("subfolder", "")),
-        os.path.basename(str(entry.get("filename", ""))),
-    )
-    kept: list[dict[str, Any]] = []
-    for item in entries:
-        item_key = (
-            str(item.get("type", "output")),
-            _safe_subfolder(item.get("subfolder", "")),
-            os.path.basename(str(item.get("filename", ""))),
+    # Serialize manifest modifications with the asynchronous legacy-frame enrichment.
+    with _MANIFEST_LOCK:
+        data = _load_manifest(node_id)
+        entries = [item for item in data.get("entries", []) if isinstance(item, dict)]
+        key = (
+            str(entry.get("type", "output")),
+            _safe_subfolder(entry.get("subfolder", "")),
+            os.path.basename(str(entry.get("filename", ""))),
         )
-        if item_key != key:
-            kept.append(item)
-    data["entries"] = [entry, *kept][:_MAX_MANIFEST_ENTRIES]
-    _save_manifest(node_id, data)
+        kept: list[dict[str, Any]] = []
+        for item in entries:
+            item_key = (
+                str(item.get("type", "output")),
+                _safe_subfolder(item.get("subfolder", "")),
+                os.path.basename(str(item.get("filename", ""))),
+            )
+            if item_key != key:
+                kept.append(item)
+        data["entries"] = [entry, *kept][:_MAX_MANIFEST_ENTRIES]
+        _save_manifest(node_id, data)
 
 
 def _resolve_vhs_video_combine():
@@ -458,12 +467,47 @@ def _find_ffprobe(ffmpeg: str | None) -> str | None:
     return None
 
 
-def _probe_media(path: Path, ffmpeg: str | None) -> dict[str, Any]:
+def _parse_positive_frames(value: Any) -> int:
+    try:
+        number = int(value)
+        return number if 0 < number < 2_000_000_000 else 0
+    except (TypeError, ValueError, OverflowError):
+        return 0
+
+
+def _count_frames_with_ffmpeg(ffmpeg: str, path: Path) -> int:
+    """Count decoded frames, without fabricating duration × FPS when ffprobe is absent.
+
+    The pack ships FFmpeg on Windows but does not necessarily ship ffprobe.
+    Do not modify the master or its timestamps. A bounded timeout ensures an
+    unusually long/malformed video never hangs a ComfyUI request indefinitely.
+    """
+    try:
+        result = subprocess.run(
+            [ffmpeg, "-nostdin", "-hide_banner", "-loglevel", "info", "-stats",
+             "-i", str(path), "-map", "0:v:0", "-an", "-fps_mode", "passthrough",
+             "-f", "null", "-"],
+            capture_output=True, text=True, timeout=60,
+        )
+        if result.returncode != 0:
+            return 0
+        matches = re.findall(r"\bframe=\s*(\d+)", result.stderr or "")
+        return _parse_positive_frames(matches[-1]) if matches else 0
+    except (OSError, subprocess.SubprocessError):
+        return 0
+
+
+def _probe_media(path: Path, ffmpeg: str | None, *, count_frames: bool = True) -> dict[str, Any]:
+    """Read video metadata and obtain a real frame count when possible.
+
+    `nb_frames` is the stream's explicit container count. When absent, request
+    `nb_read_frames` with ffprobe -count_frames or count decoded frames with the
+    bundled FFmpeg. Duration×FPS is deliberately never treated as exact.
+    """
     ffprobe = _find_ffprobe(ffmpeg)
     if not ffprobe:
         if not ffmpeg:
             return {}
-        # The bundled FFmpeg can inspect streams without a separate ffprobe.
         try:
             result = subprocess.run(
                 [ffmpeg, "-hide_banner", "-i", str(path), "-map", "0:v:0", "-frames:v", "0", "-f", "null", "-"],
@@ -473,19 +517,20 @@ def _probe_media(path: Path, ffmpeg: str | None) -> dict[str, Any]:
             stream = next((line for line in text.splitlines() if "Stream #0:" in line and "Video:" in line), "")
             match = re.search(r"Video:\s*([^,\s]+).*?,\s*([a-z][a-z0-9]+)(?:\([^)]*\))?,\s*(\d+)x(\d+)", stream)
             duration = re.search(r"Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)", text)
-            if not match:
-                return {}
             seconds = (int(duration[1])*3600 + int(duration[2])*60 + float(duration[3])) if duration else 0.0
-            return {"codec": match[1], "pixel_format": match[2], "width": int(match[3]), "height": int(match[4]), "duration": seconds, "frame_count": 0}
-        except Exception:
+            data = {"duration": seconds, "frame_count": 0, "frame_count_verified": False}
+            if match:
+                data.update({"codec": match[1], "pixel_format": match[2], "width": int(match[3]), "height": int(match[4])})
+            if count_frames:
+                data["frame_count"] = _count_frames_with_ffmpeg(ffmpeg, path)
+                data["frame_count_verified"] = data["frame_count"] > 0
+            return data
+        except (OSError, subprocess.SubprocessError):
             return {}
     cmd = [
-        ffprobe,
-        "-v", "error",
-        "-select_streams", "v:0",
+        ffprobe, "-v", "error", "-select_streams", "v:0",
         "-show_entries", "stream=codec_name,pix_fmt,width,height,bits_per_raw_sample,nb_frames:format=duration",
-        "-of", "json",
-        str(path),
+        "-of", "json", str(path),
     ]
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=15)
@@ -494,11 +539,17 @@ def _probe_media(path: Path, ffmpeg: str | None) -> dict[str, Any]:
         data = json.loads(result.stdout or "{}")
         stream = (data.get("streams") or [{}])[0] or {}
         fmt = data.get("format") or {}
-        nb_frames = stream.get("nb_frames", 0)
-        try:
-            frame_count = int(nb_frames or 0)
-        except Exception:
-            frame_count = 0
+        frames = _parse_positive_frames(stream.get("nb_frames"))
+        if not frames and count_frames:
+            # Some media containers (notably Matroska/WebM) omit nb_frames.
+            result_counted = subprocess.run(
+                [ffprobe, "-v", "error", "-count_frames", "-select_streams", "v:0",
+                 "-show_entries", "stream=nb_read_frames", "-of", "json", str(path)],
+                capture_output=True, text=True, timeout=60,
+            )
+            if result_counted.returncode == 0:
+                counted = json.loads(result_counted.stdout or "{}")
+                frames = _parse_positive_frames(((counted.get("streams") or [{}])[0] or {}).get("nb_read_frames"))
         return {
             "codec": str(stream.get("codec_name", "") or ""),
             "pixel_format": str(stream.get("pix_fmt", "") or ""),
@@ -506,10 +557,52 @@ def _probe_media(path: Path, ffmpeg: str | None) -> dict[str, Any]:
             "width": int(stream.get("width", 0) or 0),
             "height": int(stream.get("height", 0) or 0),
             "duration": float(fmt.get("duration", 0.0) or 0.0),
-            "frame_count": frame_count,
+            "frame_count": frames,
+            "frame_count_verified": frames > 0,
         }
-    except Exception:
+    except (OSError, subprocess.SubprocessError, ValueError, IndexError, TypeError, KeyError):
         return {}
+
+
+def _refresh_legacy_frame_count(history_id: str, filename: str, subfolder: str, media_type: str) -> dict[str, Any] | None:
+    """Update only a recorded historical output; never probe arbitrary user paths."""
+    key = (media_type, _safe_subfolder(subfolder), os.path.basename(filename))
+    with _MANIFEST_LOCK:
+        manifest = _load_manifest(history_id)
+        entry = next((item for item in manifest.get("entries", []) if isinstance(item, dict) and (
+            str(item.get("type", "output")), _safe_subfolder(item.get("subfolder", "")),
+            os.path.basename(str(item.get("filename", "")))
+        ) == key), None)
+        if entry is None:
+            return None
+        if entry.get("frame_count_verified") or entry.get("frame_count_checked") or entry.get("is_image"):
+            return _public_entry(entry)
+        file_path = _resolve_media_file(*key)
+        if file_path is None or not file_path.is_file():
+            return None
+
+    # The potentially expensive probe runs without holding the manifest lock.
+    ffmpeg = _find_ffmpeg(_resolve_vhs_video_combine())
+    metadata = _probe_media(file_path, ffmpeg, count_frames=True)
+    count = _parse_positive_frames(metadata.get("frame_count"))
+    with _MANIFEST_LOCK:
+        manifest = _load_manifest(history_id)  # Re-read: generation may have added a new entry meanwhile.
+        entry = next((item for item in manifest.get("entries", []) if isinstance(item, dict) and (
+            str(item.get("type", "output")), _safe_subfolder(item.get("subfolder", "")),
+            os.path.basename(str(item.get("filename", "")))
+        ) == key), None)
+        if entry is None:
+            return None
+        if not entry.get("frame_count_verified"):
+            entry["frame_count"] = count
+            entry["frame_count_verified"] = count > 0
+            entry["frame_count_checked"] = True
+            if metadata.get("width") and not entry.get("width"):
+                entry["width"] = metadata["width"]
+            if metadata.get("height") and not entry.get("height"):
+                entry["height"] = metadata["height"]
+            _save_manifest(history_id, manifest)
+        return _public_entry(entry)
 
 
 def _thumbnail_from_workflow(preview: dict[str, Any]) -> tuple[str, str, str] | None:
@@ -672,12 +765,7 @@ def _entry_from_success(
     if not workflow_path or not workflow_path.is_file():
         workflow_filename = ""
 
-    probed_frame_count = int(probe.get("frame_count", 0) or 0)
-    if not probed_frame_count and probe.get("duration") and frame_rate:
-        try:
-            probed_frame_count = max(0, int(round(float(probe.get("duration", 0.0)) * float(frame_rate))))
-        except Exception:
-            probed_frame_count = 0
+    probed_frame_count = _parse_positive_frames(probe.get("frame_count"))
 
     actual_depth = _pix_fmt_depth(str(probe.get("pixel_format", "") or ""))
     if not actual_depth:
@@ -710,6 +798,8 @@ def _entry_from_success(
         "height": int(probe.get("height", 0) or 0),
         "duration": float(probe.get("duration", 0.0) or 0.0),
         "frame_count": probed_frame_count,
+        "frame_count_verified": bool(probe.get("frame_count_verified", False)) and probed_frame_count > 0,
+        "frame_count_checked": not is_image,
         "codec": str(probe.get("codec", "") or ""),
         "pixel_format": str(probe.get("pixel_format", "") or ""),
         "is_image": is_image,
@@ -925,3 +1015,31 @@ async def lyonir_save_video_media(request):
     if path is None or not path.is_file():
         raise web.HTTPNotFound(text="Lyonir video media not found")
     return web.FileResponse(path)
+
+
+@PromptServer.instance.routes.post("/lyonir/save-video/frame-count")
+async def lyonir_save_video_frame_count(request):
+    """Asynchronously enrich legacy gallery entries without blocking the ComfyUI event loop."""
+    try:
+        payload = await request.json()
+        if not isinstance(payload, dict):
+            raise ValueError("Invalid request")
+        history_id = str(payload.get("history_id", "")).strip()
+        filename = str(payload.get("filename", "")).strip()
+        subfolder = str(payload.get("subfolder", ""))
+        media_type = str(payload.get("type", "output"))
+        if not history_id or len(history_id) > 160 or not filename or len(filename) > 300:
+            raise ValueError("Invalid history entry")
+        if media_type not in {"output", "temp"} or len(subfolder) > 400:
+            raise ValueError("Invalid media location")
+        async with _FRAME_PROBE_SEMAPHORE:
+            entry = await asyncio.to_thread(
+                _refresh_legacy_frame_count, history_id, filename, subfolder, media_type
+            )
+        if entry is None:
+            return web.json_response({"ok": False, "error": "History entry not found"}, status=404)
+        return web.json_response({"ok": True, "entry": entry})
+    except (ValueError, TypeError) as exc:
+        return web.json_response({"ok": False, "error": str(exc)}, status=400)
+    except Exception as exc:
+        return web.json_response({"ok": False, "error": str(exc)}, status=500)

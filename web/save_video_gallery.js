@@ -15,6 +15,7 @@ const BASE_THUMB_SIZE = 32;
 const THUMB_MIN_SIZE = 24;
 const THUMB_MAX_SIZE = 96;
 const THUMB_SLIDER_HEIGHT = 18;
+const GENERATION_INFO_HEIGHT = 58;
 function newHistoryId() {
     try {
         if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
@@ -442,7 +443,7 @@ function createGallery(node) {
     const generationInfo = document.createElement("div");
     generationInfo.dataset.lyonirGenerationInfo = "1";
     Object.assign(generationInfo.style, {
-        position: "relative", width: "100%", height: "40px",
+        position: "relative", width: "100%", height: `${GENERATION_INFO_HEIGHT}px`,
         boxSizing: "border-box", padding: "2px 6px", fontSize: "12px",
         lineHeight: "18px", color: "inherit", background: "transparent",
         overflow: "hidden", display: "none",
@@ -461,8 +462,10 @@ function createGallery(node) {
         color: "inherit", background: "transparent", cursor: "pointer",
     });
     const resolutionLabel = document.createElement("div");
+    const framesLabel = document.createElement("div");
+    framesLabel.dataset.lyonirFrameCount = "1";
     seedRow.append(seedLabel, copySeedButton);
-    generationInfo.append(seedRow, resolutionLabel);
+    generationInfo.append(seedRow, resolutionLabel, framesLabel);
     let copySeedTimer = null;
     let copySeedRevision = 0;
 
@@ -504,7 +507,12 @@ function createGallery(node) {
         const seeds = Array.isArray(selected?.generation_seeds) ? selected.generation_seeds : [];
         copySeedButton.disabled = !seeds.length;
         copySeedButton.title = seeds.length ? "Copiar seed do vídeo selecionado" : "Seed indisponível neste vídeo";
-        if (!selected) { seedLabel.textContent = ""; resolutionLabel.textContent = ""; return; }
+        if (!selected) {
+            seedLabel.textContent = "";
+            resolutionLabel.textContent = "";
+            framesLabel.textContent = "";
+            return;
+        }
         const width = Number(selected.width) || (useLoadedSize ? (selected.is_image ? image.naturalWidth : video.videoWidth) : 0);
         const height = Number(selected.height) || (useLoadedSize ? (selected.is_image ? image.naturalHeight : video.videoHeight) : 0);
         const seedText = seeds.length ? seeds.join(", ") : "Unavailable";
@@ -512,6 +520,23 @@ function createGallery(node) {
         seedLabel.textContent = `Seed: ${seedText}`;
         seedLabel.title = seedLabel.textContent;
         resolutionLabel.textContent = `Resolution: ${sizeText}`;
+        if (selected.is_image) {
+            framesLabel.textContent = "";
+        } else {
+            const frames = verifiedFrameCount(selected);
+            const fps = Number(selected.frame_rate) || 0;
+            const duration = Number(selected.duration) || 0;
+            const details = [`Frames: ${frames ? frames.toLocaleString("pt-BR") : selected.frame_count_checked ? "indisponível" : "verificando…"}`];
+            if (fps > 0) details.push(`${Number.isInteger(fps) ? fps : fps.toFixed(2)} FPS`);
+            if (duration > 0) details.push(`${Number(duration.toFixed(2))} s`);
+            framesLabel.textContent = details.join("  ·  ");
+            framesLabel.title = frames ? "Quantidade de frames registrada ou verificada no arquivo original" : "Não foi possível confirmar a quantidade de frames";
+        }
+    }
+
+    function verifiedFrameCount(entry) {
+        const count = Number(entry?.frame_count) || 0;
+        return entry?.frame_count_verified === true && Number.isInteger(count) && count > 0 ? count : 0;
     }
 
     root.append(generationInfo, previewWrap, historyStrip, thumbControl);
@@ -556,7 +581,7 @@ function createGallery(node) {
     function computeWidgetSize(width) {
         const widgetWidth = Math.max(1, Number(width) || Number(node?.size?.[0]) || BASE_NODE_WIDTH);
         const ratio = selectedAspectRatio();
-        const stripHeight = historyHeight() + (selected ? 40 : 0);
+        const stripHeight = historyHeight() + (selected ? GENERATION_INFO_HEIGHT : 0);
         if (hiddenPreview) return [widgetWidth, stripHeight || -4];
         if (!selected || !ratio) return [widgetWidth, stripHeight || -4];
 
@@ -684,12 +709,11 @@ function createGallery(node) {
         const width = Number(selected.width) || Number(video.videoWidth) || Number(image.naturalWidth) || 0;
         const height = Number(selected.height) || Number(video.videoHeight) || Number(image.naturalHeight) || 0;
         const fps = Number(selected.frame_rate) || 0;
-        let frames = Number(selected.frame_count) || 0;
-        if (!frames && selected.duration && fps) frames = Math.round(Number(selected.duration) * fps);
+        const frames = verifiedFrameCount(selected);
         const parts = [];
         if (width && height) parts.push(`${width}x${height}`);
         if (fps) parts.push(`@${Number.isInteger(fps) ? fps : fps.toFixed(2)}fps`);
-        if (frames) parts.push(`${frames}frames`);
+        if (frames) parts.push(`${frames} frames`);
         return parts.join("");
     }
 
@@ -826,6 +850,50 @@ function createGallery(node) {
             entry.filename === target.filename && entry.subfolder === target.subfolder && entry.type === target.type
         );
         selectEntry(match || target);
+        refreshLegacyFrameCounts();
+    }
+
+    let frameCountRequestRevision = 0;
+    let galleryDestroyed = false;
+
+    function refreshLegacyFrameCounts() {
+        // Each request runs in a bounded background worker on the server. The
+        // UI remains interactive while a historical video's frames are counted.
+        const revision = ++frameCountRequestRevision;
+        const historyId = ensureHistoryIdentity(node);
+        for (const entry of history) {
+            if (entry.is_image || entry.frame_count_verified || entry.frame_count_checked) continue;
+            void (async () => {
+                try {
+                    const response = await fetch(api.apiURL("/lyonir/save-video/frame-count"), {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                            history_id: historyId,
+                            filename: entry.filename,
+                            subfolder: entry.subfolder || "",
+                            type: entry.type || "output",
+                        }),
+                    });
+                    if (!response.ok) return;
+                    const result = await response.json();
+                    if (!result?.ok || !result.entry || galleryDestroyed || revision !== frameCountRequestRevision) return;
+                    const match = history.find((item) =>
+                        item.filename === entry.filename && item.subfolder === entry.subfolder && item.type === entry.type
+                    );
+                    if (!match) return;
+                    Object.assign(match, result.entry);
+                    if (selected?.filename === match.filename && selected?.subfolder === match.subfolder && selected?.type === match.type) {
+                        // No selectEntry: that would reload/restart the playing video.
+                        Object.assign(selected, result.entry);
+                        updateGenerationInfo();
+                    }
+                    renderHistory();
+                } catch (error) {
+                    console.warn("[Lyonir Save Video] background frame inspection failed", error);
+                }
+            })();
+        }
     }
 
     async function fetchHistory() {
@@ -892,6 +960,8 @@ function createGallery(node) {
     syncLayout();
 
     function destroy() {
+        galleryDestroyed = true;
+        ++frameCountRequestRevision;
         resetCopySeedFeedback();
         pauseCurrent();
         video.removeAttribute("src");

@@ -52,3 +52,5 @@ Video metadata validation: tests passed for final-sampler selection, seed zero, 
 3.5.22 validation: simulated right-to-left reveal endpoints, A/B labels, workflow serialization and preview restore, saved wipe position and unrelated empty workflow isolation passed. Python and JavaScript syntax passed. The user installed the complete test pack and confirmed correct behavior in ComfyUI, including the requested fixes. Release Image Compare code is identical to the accepted test pack.
 
 3.5.23 validation: only Image Compare label creation and visibility removed from runtime code. JavaScript syntax passed. Wipe and preview restoration code unchanged. Live visual validation not performed.
+
+3.5.24 validation: the change was rebased onto the user-uploaded v3.5.23 ZIP. Only Save Video backend/frontend, version references and release documentation were changed. Automated syntax, archive-integrity and synthetic FFmpeg/FFprobe frame-count tests are documented by this build. User live ComfyUI validation is pending.
