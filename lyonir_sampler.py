@@ -5,6 +5,7 @@ from typing import Optional
 
 import torch
 
+from .latent_decode_crop import set_latent_crop
 from .progress_utils import update_progress
 from .sampler_progress import total_progress, make_sampler_progress as make_progress
 
@@ -15,6 +16,7 @@ CROP_ANCHORS = [
 ]
 MODEL_FAMILIES = ["auto", "minimax", "ltx", "bernini", "wan"]
 NOISE_MODES = ["enabled", "disabled"]
+SAMPLING_MODES = ["Basic Scheduler", "Manual Sigmas"]
 
 try:
     import comfy.samplers as _comfy_samplers
@@ -196,6 +198,28 @@ def _calculate_sigmas(model, scheduler: str, steps: int, denoise: float):
         model.get_model_object("model_sampling"), str(scheduler), total_steps
     ).cpu()
     return sigmas[-(steps + 1):]
+
+
+def _validated_manual_sigmas(sigmas):
+    """Return an external SIGMAS tensor without calculating a new schedule.
+
+    An external scheduler (e.g. ComfyUI Manual Sigmas) owns the complete sigma
+    sequence in this mode; the Steps, scheduler, and denoise widgets are ignored.
+    """
+    if sigmas is None:
+        raise ValueError(
+            "Lyonir Sampler is in Manual Sigmas mode. Connect a SIGMAS output "
+            "(for example, from the ComfyUI Manual Sigmas node) to the sigmas input."
+        )
+    if not torch.is_tensor(sigmas) or sigmas.ndim != 1 or sigmas.numel() < 2:
+        raise ValueError(
+            "Lyonir Sampler Manual Sigmas expects a 1D SIGMAS tensor "
+            "with at least two values (one sampling interval)."
+        )
+    if not torch.is_floating_point(sigmas) or not bool(torch.isfinite(sigmas).all().item()):
+        raise ValueError("Lyonir Sampler Manual Sigmas requires finite floating-point values.")
+    # ComfyUI's own scheduler yields float32 CPU sigmas; use the same layout.
+    return sigmas.detach().to(device="cpu", dtype=torch.float32)
 
 
 def _prepare_latent(model, latent: dict):
@@ -539,6 +563,10 @@ class LyonirSampler:
                 "negative": ("CONDITIONING",),
                 "audio_vae": ("VAE",),
                 "cfg": ("FLOAT", {"default": 1.0, "min": 0.0, "max": 100.0, "step": 0.1, "round": 0.01}),
+                # Keep the backend schema order unchanged for older saved workflows; the frontend arranges the visible controls.
+                # Only Manual Sigmas uses this optional SIGMAS socket. Basic Scheduler ignores it.
+                "sampling_mode": (SAMPLING_MODES, {"default": "Basic Scheduler", "tooltip": "Basic Scheduler: use steps/scheduler/denoise. Manual Sigmas: use the connected SIGMAS schedule only."}),
+                "sigmas": ("SIGMAS",),
             },
         }
 
@@ -549,7 +577,8 @@ class LyonirSampler:
     DESCRIPTION = (
         "Unified SamplerCustomAdvanced-style sampler for MiniMax H3, LTX, Bernini-R and Wan. "
         "Auto detects the family when possible; manual override is available. MiniMax uses the frozen v2.8 BasicGuider path. "
-        "Other families use a clean single-model custom-sampling path with optional negative/CFG, built-in video/audio decode, exact hard crop, and native LTX IC-LoRA guide cleanup. "
+        "Other families use a clean single-model custom-sampling path with optional negative/CFG, built-in video/audio decode, exact IMAGE crop plus automatic LATENT post-decode crop for native VAEDecode/Tiled, and native LTX IC-LoRA guide cleanup. "
+        "Sampling Mode switches between Basic Scheduler (internal steps/scheduler/denoise) and Manual Sigmas (the connected SIGMAS schedule only). "
         "If you want a second stage or another model, chain a second Lyonir Sampler in the workflow instead of using a secondary model inside the node."
     )
 
@@ -573,6 +602,8 @@ class LyonirSampler:
         audio_vae=None,
         negative=None,
         cfg=1.0,
+        sampling_mode="Basic Scheduler",
+        sigmas=None,
     ):
         pbar = make_progress()
         update_progress(pbar, 2)
@@ -585,29 +616,57 @@ class LyonirSampler:
         if family == "ltx":
             _validate_ltx_canvas(latent, target_width, target_height)
 
+        mode = str(sampling_mode or "Basic Scheduler")
+        # Accept the old v3.5.25 label from saved workflows.
+        if mode == "Steps":
+            mode = "Basic Scheduler"
+        if mode not in SAMPLING_MODES:
+            raise ValueError(f"Unsupported Lyonir Sampler Sampling Mode: {mode!r}.")
+        manual_sigmas = _validated_manual_sigmas(sigmas) if mode == "Manual Sigmas" else None
+
         pbar.stage(8, 76)
         if family == "minimax":
             source_width, source_height = _validate_minimax_native_latent(latent, target_width, target_height)
-            sampled, guider_name, passes = _sample_minimax_v28(
-                model, conditioning, latent, int(seed), str(noise), int(steps), str(sampler_name), str(scheduler), float(denoise)
-            )
+            if manual_sigmas is None:
+                # Keep the original proven MiniMax steps path unchanged.
+                sampled, guider_name, passes = _sample_minimax_v28(
+                    model, conditioning, latent, int(seed), str(noise), int(steps), str(sampler_name), str(scheduler), float(denoise)
+                )
+            else:
+                sampled, guider_name = _sample_once(
+                    model=model, conditioning=conditioning, negative=None,
+                    latent=latent, seed=int(seed), noise_mode=str(noise),
+                    sampler_name=str(sampler_name), sigmas=manual_sigmas,
+                    cfg=1.0, force_basic=True,
+                )
+                passes = "single"
         else:
             source_width = _native_size_from_value(target_width)
             source_height = _native_size_from_value(target_height)
-            sampled, guider_name, passes = _sample_generic(
-                family=family,
-                model=model,
-                conditioning=conditioning,
-                negative=negative,
-                latent=latent,
-                seed=int(seed),
-                noise=str(noise),
-                cfg=float(cfg),
-                steps=int(steps),
-                sampler_name=str(sampler_name),
-                scheduler=str(scheduler),
-                denoise=float(denoise),
-            )
+            if manual_sigmas is None:
+                # Backwards-compatible Basic Scheduler path, unchanged for existing workflows.
+                sampled, guider_name, passes = _sample_generic(
+                    family=family,
+                    model=model,
+                    conditioning=conditioning,
+                    negative=negative,
+                    latent=latent,
+                    seed=int(seed),
+                    noise=str(noise),
+                    cfg=float(cfg),
+                    steps=int(steps),
+                    sampler_name=str(sampler_name),
+                    scheduler=str(scheduler),
+                    denoise=float(denoise),
+                )
+            else:
+                sampled, guider_name = _sample_once(
+                    model=model, conditioning=conditioning, negative=negative,
+                    latent=latent, seed=int(seed), noise_mode=str(noise),
+                    sampler_name=str(sampler_name), sigmas=manual_sigmas,
+                    cfg=float(cfg), force_basic=False,
+                )
+                passes = "single"
         update_progress(pbar, 76)
 
         ltx_guides_cropped = 0
@@ -625,7 +684,15 @@ class LyonirSampler:
         pbar.stage(76, 87)
         images = _decode_video(video_vae, sampled_for_decode)
         update_progress(pbar, 87)
+        # IMAGE: hard crop directly after internal VAE decode.
+        # LATENT: keep the untouched native sampled tensor (no VAE re-encode),
+        # and carry exact crop metadata through LTX AV split/concat to ComfyUI's
+        # native VAE Decode and VAE Decode (Tiled) post-decode hooks.
+        # For 720px LTX output, truncating latent cells would yield 704px;
+        # metadata is necessary to preserve both 720px output and image quality.
+        source_decoded_size = None
         if images is not None:
+            source_decoded_size = (int(images.shape[2]), int(images.shape[1]))
             images = _crop_images(images, requested_width, requested_height, crop_anchor)
         update_progress(pbar, 93)
         pbar.stage(93, 98)
@@ -635,14 +702,18 @@ class LyonirSampler:
         decoded_w = int(images.shape[2]) if torch.is_tensor(images) and images.ndim == 4 else None
         decoded_h = int(images.shape[1]) if torch.is_tensor(images) and images.ndim == 4 else None
         decoded_frames = int(images.shape[0]) if torch.is_tensor(images) and images.ndim == 4 else None
-        sigma_mode = f"scheduler:{scheduler}"
+        sigma_mode = "manual:external" if manual_sigmas is not None else f"scheduler:{scheduler}"
+        effective_steps = int(manual_sigmas.numel()) - 1 if manual_sigmas is not None else int(steps)
+        info_denoise = "external" if manual_sigmas is not None else f"{float(denoise):.3f}"
         info = (
             f"Lyonir Sampler | family={family} | requested={requested_width}x{requested_height} | "
             f"input_native_hint={source_width}x{source_height} | decoded_final={decoded_w}x{decoded_h} | "
+            f"decoded_source={source_decoded_size} | crop_applied_to=images+tagged_latent_decode | "
             f"decoded_frames={decoded_frames} | ltx_guides_cropped={ltx_guides_cropped} | "
-            f"guider={guider_name} | cfg={float(cfg):.2f} | steps={int(steps)} | sampler={sampler_name} | "
-            f"sigmas={sigma_mode} | denoise={float(denoise):.3f} | noise={noise} | sampling={passes} | "
-            "core=ComfyUI_custom_sampling | crop=hard | resize=no | upscale=no"
+            f"guider={guider_name} | cfg={float(cfg):.2f} | steps={effective_steps} | sampler={sampler_name} | "
+            f"sampling_mode={mode} | sigmas={sigma_mode} | denoise={info_denoise} | noise={noise} | sampling={passes} | "
+            "core=ComfyUI_custom_sampling | crop=hard(images+tagged_latent_decode) | latent=sampled_untouched | vae_reencode=no | resize=no | upscale=no"
         )
+        tagged_latent = set_latent_crop(sampled, requested_width, requested_height, crop_anchor)
         update_progress(pbar, 100)
-        return images, audio, sampled, info
+        return images, audio, tagged_latent, info

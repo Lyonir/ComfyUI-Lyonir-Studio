@@ -1028,7 +1028,8 @@
         "scheduler": "simple",
         "denoise": 1,
         "crop_anchor": "center",
-        "cfg": 1
+        "cfg": 1,
+        "sampling_mode": "Basic Scheduler"
       },
       "color": "#223",
       "bgcolor": "#335"

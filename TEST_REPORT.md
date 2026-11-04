@@ -1,3 +1,38 @@
+## v3.5.31 local regression tests (2026-11-04; not published)
+
+- Diagnosis: v3.5.30 VAE decode→pixel crop→VAE re-encode truncated LTX spatial pixels from 720 to 704 because height 720 is not divisible by LTX VAE factor 32; lossy re-encode could also introduce image artifacts.
+- Fix: revert to the v3.5.29/v3.5.24 sampling backend and **remove VAE re-encoding** entirely. LATENT samples remain unchanged; attach exact final crop metadata to the LATENT dict.
+- The same hard pixel crop runs on IMAGE output and on output of ComfyUI stock VAEDecode / VAEDecodeTiled when provided a marked LATENT, including after LTXVSeparateAVLatent (which copies the dict). No workflow crop node required for these builtin decoders.
+- Synthetic regression: 1280x768 native LTX sample is decoded and cropped to exactly 1280x720, including center/top/bottom anchor; unmarked inputs remain native, input LATENT tensor identity preserved, undersized decoded dimensions fail loudly.
+- Two-stage simulated LTX workflow: Stage 1 Basic Scheduler target 640x360, Stage 2 Manual Sigmas target 1280x720, stock tiled decoder output exactly 1280x720. No re-encoding.
+- JavaScript interface simulation: SIGMAS widget row beneath Sampling Mode, steps/scheduler/denoise only when Basic, Ctrl+C/Ctrl+V restoration.
+- Packaging and Python syntax checked. **Real LTX 2.3 execution and visual quality on the user's Windows RTX 3090 have not been tested**; GPU acceptance pending.
+- Scope: builtin VAEDecode and VAEDecodeTiled only. Third-party VAE decoder implementations may ignore crop metadata. LTX LATENT grid cannot physically store an arbitrary 720-pixel height: exact output is enforced after decode.
+- No GitHub/Registry publication.
+
+## v3.5.29: Sampling Mode visual row and crop scope
+
+- Current ComfyUI Vue frontend renders non-widget SIGMAS sockets in the upper socket list even when `slot.pos` / `getConnectionPos` changes. This fix attaches SIGMAS to a **real, non-serialized widget row** immediately under Sampling Mode, and keeps the input type `SIGMAS` and its graph link compatibility.
+- Frontend regression harness: manual SIGMAS is widget-backed (thus absent from Vue top-level socket list); row immediately follows Sampling Mode; Basic Scheduler hides it; copy/paste and legacy mode restoration preserve widgets; step controls only appear in Basic Scheduler.
+- Backend crop regression: tests cover exact width and height for center/top-left/bottom-right crop anchors, preservation of pixel values (hard crop rather than resize), and proper error on undersized frames. The output of `latent` is intentionally not cropped; a subsequent external VAE Decode needs a downstream image crop.
+- Live ComfyUI frontend validation on the user's Windows setup remains pending. No GitHub/Registry publication.
+
+## v3.5.28: Lyonir Sampler copy/paste widget restoration regression
+
+- Correctly distinguish LiteGraph `widget.serialize` (workflow persistence) from `widget.options.serialize` (API prompt persistence).
+- Persist named values and the serialized widget order; use named values preferentially when restoring nodes (including Ctrl+C / Ctrl+V and workflow reopening).
+- Fallback for legacy positional-only workflows, including v3.5.26/v3.5.27 and original-schema layouts.
+- Automated `node` harness tested native SIGMAS port visibility, Basic Scheduler/Manual Sigmas alternation, repeat duplication, out-of-order positional data, and the seed's `control_after_generate` auxiliary widget.
+- Backend Python and JavaScript syntax verified; complete 73-entry ZIP checked; files outside the six changed files plus TEST_REPORT remain byte-identical to the approved v3.5.27 release.
+- **User verification still required:** Ctrl+C / Ctrl+V and workflow reloading in the actual ComfyUI frontend on Windows. Tests simulate frontend behavior and are not a replacement for that verification.
+- **Not published** to GitHub or ComfyUI Registry.
+
+## v3.5.27 regression: Manual Sigmas port visibility
+- Native SIGMAS socket is no longer associated with an unregistered widget anchor.
+- UI uses native addInput/removeInput and explicit connector positioning directly below Sampling Mode.
+- Existing Basic Scheduler behavior, legacy label conversion and workflow widgets remain unchanged.
+- Automated tests: see console/test logs when run; real ComfyUI Windows UI verification still required.
+
 # Local test report
 
 Tested using the Python already available in the Desktop ComfyUI Portable,
@@ -54,3 +89,19 @@ Video metadata validation: tests passed for final-sampler selection, seed zero, 
 3.5.23 validation: only Image Compare label creation and visibility removed from runtime code. JavaScript syntax passed. Wipe and preview restoration code unchanged. Live visual validation not performed.
 
 3.5.24 validation: the change was rebased onto the user-uploaded v3.5.23 ZIP. Only Save Video backend/frontend, version references and release documentation were changed. Automated syntax, archive-integrity and synthetic FFmpeg/FFprobe frame-count tests are documented by this build. User live ComfyUI validation is pending.
+
+### v3.5.25 local test build (Sampling Mode)
+
+- Python sampler code compiled successfully; all four frontend JS files pass `node --check`.
+- Nine mocked backend tests passed: unchanged Steps route, connected Manual Sigmas schedule without internal sigma calculation, effective steps, no-sigmas error, invalid-sigmas error, manual/Steps MiniMax guider behavior, Steps ignoring sigmas when connected, and default legacy mode.
+- Frontend harness passed: mode widget callback, hide/show steps/scheduler/denoise, graph restore, link target slot preservation, and no widget reordering.
+- No live ComfyUI/GPU test was performed in the build environment. Please test manually before any GitHub/Registry publication.
+
+### v3.5.27 local test build (Basic Scheduler / SIGMAS layout)
+
+- Based on the full user-approved v3.5.25 ZIP, preserving the pack's other nodes and bundled media.
+- Backend Python tests: 10 passed, covering Basic Scheduler, Manual Sigmas, MiniMax behavior, invalid/missing sigmas, legacy `Steps` alias.
+- Frontend harness: Basic Scheduler controls directly beneath Sampling Mode; only Manual Sigmas exposes SIGMAS input and reserves a row directly beneath the selector; legacy/current workflow widget values reload correctly.
+- Node.js JS syntax and Python compilation checks passed. ZIP integrity check performed.
+- **Live ComfyUI GUI validation has not been performed**; test input position/connectivity and Save/Reload in the user's frontend before publishing.
+- **No GitHub or Registry changes made.**
