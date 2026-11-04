@@ -1,6 +1,6 @@
 {
   "name": "comfyui-lyonir-studio",
-  "version": "3.5.24",
+  "version": "3.5.31",
   "private": false,
   "description": "Lyonir Studio custom nodes for ComfyUI",
   "lyonir": {
@@ -64,6 +64,21 @@
       "ui": "preview-first transparent A/B compare surface matching Save Image behavior",
       "layout": "no black placeholder panel; no instructional empty-state text; compare area fills the node body",
       "contextMenu": "Open Image, Copy Image, Save Image, MaskEditor; action follows the image under the pointer"
-    }
+    },
+    "samplerSamplingMode": {
+      "options": [
+        "Basic Scheduler",
+        "Manual Sigmas"
+      ],
+      "default": "Basic Scheduler",
+      "manualSigmasInput": "SIGMAS (visible under Sampling Mode only when Manual Sigmas is selected)",
+      "manualSkips": [
+        "steps",
+        "scheduler",
+        "denoise"
+      ],
+      "legacyWorkflows": "Basic Scheduler (also accepts prior Steps label)"
+    },
+    "samplerLatentCrop": "v3.5.31 exact desired pixel target on LATENT dict, applies after built-in VAE Decode or VAE Decode (Tiled), untouched original sampled latent; no VAE reencode"
   }
 }

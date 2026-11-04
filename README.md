@@ -1,8 +1,14 @@
+## v3.5.31 — exact LATENT output crop in stock VAE decoders
+
+When 🐺 Lyonir Resolution targets e.g. 1280x720 (LTX native 1280x768), 🐺 Lyonir Sampler returns directly hard-cropped IMAGE and a lossless native LATENT carrying the exact crop target. Standard ComfyUI **VAE Decode** and **VAE Decode (Tiled)** automatically apply the exact 1280x720 hard crop after decode; no extra crop node is needed. The LATENT pixels/tensor are unchanged (no VAE re-encode) so two-stage LTX sampling retains its original quality. Physical LTX latent dimensions are multiples of 32; this is a decoded-output guarantee for the built-in VAE decoders, not an impossible 720-pixel latent grid. Third-party decoders may not honor the tag.
+
 # 🐺 ComfyUI Lyonir Studio
 
 Custom nodes for **ComfyUI**, created by **Lyonir Studio**.
 
 Current public version: **v3.5.24**.
+
+Local test build: **v3.5.29** (Basic Scheduler / Manual Sigmas layout; not published on GitHub or ComfyUI Registry).
 
 Save Image now shows the selected image resolution and recorded generation seed above the clean preview, with **Copiar seed**. Existing images without recorded seeds show Unavailable; their dimensions are read when loaded. For a batch, the seed is the sampler generation seed, not an inferred per-image seed. 
 
@@ -133,6 +139,15 @@ Persistent image history directly inside the node, with quick access to previous
 ### Lyonir Sampler
 
 Unified custom-sampling workflow for supported model families. See [MULTIMODEL.md](MULTIMODEL.md) for model-family notes.
+
+**Sampling Mode (v3.5.29 local test):**
+
+- **Basic Scheduler** (default) — the normal sampler with `steps`, `scheduler`, and `denoise` directly below **Sampling Mode**.
+- **Manual Sigmas** — shows a native `SIGMAS` connector in its **own row directly below Sampling Mode**, replacing those three controls. Connect a `SIGMAS` output from a scheduler node. In this mode the sampler uses the supplied sigmas instead of internally calculating a schedule.
+
+The SIGMAS row is linked to an actual registered `converted-widget` input, so current ComfyUI Vue nodes render it with the other widgets instead of beside `video_vae` / `audio_vae` at the top. This visual row is not saved as a sampling parameter, and does not shift widget values on Ctrl+C/Ctrl+V or workflow reload. Older saved workflows continue working.
+
+**Crop / resolution:** Lyonir Sampler crops its decoded images and tags its native latent with the requested dimensions. Stock ComfyUI VAE Decode and VAE Decode (Tiled) apply the same crop after decoding, including the LTX AV workflow.
 
 ### Qwen3-TTS
 

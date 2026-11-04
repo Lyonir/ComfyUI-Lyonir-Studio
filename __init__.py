@@ -39,10 +39,15 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "Lyonir_SaveVideo": "🐺 Lyonir Save Video",
 }
 
-__version__ = "3.5.24"
+__version__ = "3.5.31"
 
 print(f"[Lyonir Studio] v{__version__} loaded")
 
 
 # Frontend widgets (Nodes 2.0 compatible DOM UI).
 WEB_DIRECTORY = "./web"
+
+# Exact final pixel crop for LATENT decoded by stock ComfyUI VAE decoders.
+# This is intentionally installed after the node classes above are loaded.
+from .latent_decode_crop import install_native_vae_crop_hooks
+install_native_vae_crop_hooks()
