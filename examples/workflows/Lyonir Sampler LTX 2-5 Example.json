@@ -1,8 +1,8 @@
 {
   "id": "07824bbb-6672-4bb0-ac36-4313a519e35b",
   "revision": 0,
-  "last_node_id": 461,
-  "last_link_id": 878,
+  "last_node_id": 466,
+  "last_link_id": 887,
   "nodes": [
     {
       "id": 407,
@@ -89,15 +89,15 @@
       "id": 414,
       "type": "LTXVConcatAVLatent",
       "pos": [
-        3374.2279999999996,
-        6978.1825
+        3384.1499999999996,
+        7004.8025
       ],
       "size": [
         280,
         100
       ],
       "flags": {},
-      "order": 26,
+      "order": 28,
       "mode": 0,
       "inputs": [
         {
@@ -151,7 +151,7 @@
         120
       ],
       "flags": {},
-      "order": 25,
+      "order": 27,
       "mode": 0,
       "inputs": [
         {
@@ -179,7 +179,7 @@
           ]
         }
       ],
-      "title": "LTXVLatentUpsampler ⏱ 0.2s",
+      "title": "LTXVLatentUpsampler ⏱ 0.4s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.14.1",
@@ -210,7 +210,7 @@
         100
       ],
       "flags": {},
-      "order": 24,
+      "order": 26,
       "mode": 0,
       "inputs": [
         {
@@ -266,7 +266,7 @@
         130
       ],
       "flags": {},
-      "order": 20,
+      "order": 22,
       "mode": 0,
       "inputs": [
         {
@@ -306,6 +306,7 @@
           ]
         }
       ],
+      "title": "LTXVConditioning ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.3.56",
@@ -342,7 +343,7 @@
         100
       ],
       "flags": {},
-      "order": 22,
+      "order": 24,
       "mode": 0,
       "inputs": [
         {
@@ -365,7 +366,7 @@
           ]
         }
       ],
-      "title": "Concat AV Latent ⏱ 0.0s",
+      "title": "Concat AV Latent ⏱ 0.1s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.7.0",
@@ -396,7 +397,7 @@
         740
       ],
       "flags": {},
-      "order": 16,
+      "order": 18,
       "mode": 0,
       "inputs": [
         {
@@ -422,6 +423,7 @@
           ]
         }
       ],
+      "title": "CLIP Text Encode (Prompt) ⏱ 1.8s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.3.56",
@@ -460,7 +462,7 @@
         240
       ],
       "flags": {},
-      "order": 13,
+      "order": 15,
       "mode": 0,
       "inputs": [
         {
@@ -478,6 +480,7 @@
           ]
         }
       ],
+      "title": "CLIP Text Encode (Prompt) ⏱ 5.9s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.3.56",
@@ -516,7 +519,7 @@
         200
       ],
       "flags": {},
-      "order": 21,
+      "order": 23,
       "mode": 0,
       "inputs": [
         {
@@ -596,7 +599,7 @@
         170
       ],
       "flags": {},
-      "order": 19,
+      "order": 21,
       "mode": 0,
       "inputs": [
         {
@@ -630,6 +633,7 @@
           ]
         }
       ],
+      "title": "Empty LTXV Latent Audio ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.3.68",
@@ -682,6 +686,7 @@
           ]
         }
       ],
+      "title": "Load Latent Upscale Model ⏱ 0.3s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.7.0",
@@ -738,6 +743,7 @@
           ]
         }
       ],
+      "title": "Load Diffusion Model ⏱ 0.6s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.29.0",
@@ -781,10 +787,12 @@
           "links": [
             801,
             857,
-            866
+            866,
+            886
           ]
         }
       ],
+      "title": "Load VAE ⏱ 1.3s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.29.0",
@@ -826,10 +834,12 @@
           "links": [
             835,
             858,
-            867
+            867,
+            887
           ]
         }
       ],
+      "title": "Load VAE ⏱ 0.5s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.29.0",
@@ -874,6 +884,7 @@
           ]
         }
       ],
+      "title": "Load CLIP ⏱ 1.6s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.29.0",
@@ -906,12 +917,12 @@
       ],
       "size": [
         225,
-        0
+        94
       ],
       "flags": {
         "collapsed": true
       },
-      "order": 15,
+      "order": 17,
       "mode": 0,
       "inputs": [
         {
@@ -953,7 +964,7 @@
           "links": []
         }
       ],
-      "title": "Math Expression (length)",
+      "title": "Math Expression (length) ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.18.1",
@@ -987,12 +998,12 @@
       ],
       "size": [
         225,
-        0
+        74
       ],
       "flags": {
         "collapsed": true
       },
-      "order": 17,
+      "order": 19,
       "mode": 0,
       "inputs": [
         {
@@ -1062,12 +1073,12 @@
       ],
       "size": [
         225,
-        0
+        74
       ],
       "flags": {
         "collapsed": true
       },
-      "order": 18,
+      "order": 20,
       "mode": 0,
       "inputs": [
         {
@@ -1137,12 +1148,12 @@
       ],
       "size": [
         225,
-        0
+        74
       ],
       "flags": {
         "collapsed": true
       },
-      "order": 14,
+      "order": 16,
       "mode": 0,
       "inputs": [
         {
@@ -1180,7 +1191,7 @@
           "links": []
         }
       ],
-      "title": "Math Expression (fps)",
+      "title": "Math Expression (fps) ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.16.3",
@@ -1230,7 +1241,7 @@
           ]
         }
       ],
-      "title": "Frame Rate",
+      "title": "Frame Rate ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.16.3",
@@ -1254,7 +1265,7 @@
       ],
       "widgets_values_named": {
         "value": 24,
-        "fixed": "fixed"
+        "control_after_generate": "fixed"
       }
     },
     {
@@ -1281,7 +1292,7 @@
           ]
         }
       ],
-      "title": "Duration",
+      "title": "Duration ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.7.0",
@@ -1305,7 +1316,7 @@
       ],
       "widgets_values_named": {
         "value": 5,
-        "fixed": "fixed"
+        "control_after_generate": "fixed"
       }
     },
     {
@@ -1332,7 +1343,7 @@
           ]
         }
       ],
-      "title": "Prompt",
+      "title": "Prompt ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.16.3",
@@ -1366,10 +1377,10 @@
       ],
       "size": [
         270,
-        466
+        402
       ],
       "flags": {},
-      "order": 23,
+      "order": 25,
       "mode": 0,
       "inputs": [
         {
@@ -1427,6 +1438,14 @@
             "name": "seed"
           },
           "link": 862
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "widget": {
+            "name": "sigmas"
+          },
+          "link": 879
         }
       ],
       "outputs": [
@@ -1453,11 +1472,42 @@
           "links": null
         }
       ],
-      "title": "🐺 Lyonir Sampler ⏱ 17.0s",
+      "title": "🐺 Lyonir Sampler ⏱ 22.4s",
       "properties": {
         "cnr_id": "comfyui_fearnworksnodes",
         "ver": "0.1.2",
-        "Node name for S&R": "Lyonir_Sampler"
+        "Node name for S&R": "Lyonir_Sampler",
+        "lyonir_sampler_layout_version": 5,
+        "lyonir_sampler_widget_values_by_name": {
+          "target_width": 1080,
+          "target_height": 1080,
+          "model_family": "ltx",
+          "seed": 43,
+          "control_after_generate": "fixed",
+          "noise": "enabled",
+          "sampling_mode": "Manual Sigmas",
+          "steps": 8,
+          "scheduler": "simple",
+          "denoise": 1,
+          "sampler_name": "euler_ancestral",
+          "crop_anchor": "center",
+          "cfg": 1
+        },
+        "lyonir_sampler_widget_order": [
+          "target_width",
+          "target_height",
+          "model_family",
+          "seed",
+          "control_after_generate",
+          "noise",
+          "sampling_mode",
+          "steps",
+          "scheduler",
+          "denoise",
+          "sampler_name",
+          "crop_anchor",
+          "cfg"
+        ]
       },
       "widgets_values": [
         1080,
@@ -1466,10 +1516,11 @@
         43,
         "fixed",
         "enabled",
+        "Manual Sigmas",
         8,
-        "euler_ancestral",
         "simple",
         1,
+        "euler_ancestral",
         "center",
         1
       ],
@@ -1480,13 +1531,13 @@
         "seed": 43,
         "control_after_generate": "fixed",
         "noise": "enabled",
+        "sampling_mode": "Manual Sigmas",
         "steps": 8,
-        "sampler_name": "euler_ancestral",
         "scheduler": "simple",
         "denoise": 1,
+        "sampler_name": "euler_ancestral",
         "crop_anchor": "center",
-        "cfg": 1,
-        "sampling_mode": "Basic Scheduler"
+        "cfg": 1
       },
       "color": "#223",
       "bgcolor": "#335"
@@ -1524,7 +1575,7 @@
           ]
         }
       ],
-      "title": "🐺 Lyonir Resolution ⏱ 0.1s",
+      "title": "🐺 Lyonir Resolution ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfyui_fearnworksnodes",
         "ver": "0.1.2",
@@ -1552,10 +1603,10 @@
       ],
       "size": [
         270,
-        466
+        402
       ],
       "flags": {},
-      "order": 27,
+      "order": 29,
       "mode": 0,
       "inputs": [
         {
@@ -1613,27 +1664,33 @@
             "name": "seed"
           },
           "link": 863
+        },
+        {
+          "name": "sigmas",
+          "type": "SIGMAS",
+          "widget": {
+            "name": "sigmas"
+          },
+          "link": 880
         }
       ],
       "outputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "links": [
-            874
-          ]
+          "links": []
         },
         {
           "name": "audio",
           "type": "AUDIO",
-          "links": [
-            875
-          ]
+          "links": []
         },
         {
           "name": "latent",
           "type": "LATENT",
-          "links": []
+          "links": [
+            883
+          ]
         },
         {
           "name": "info",
@@ -1641,11 +1698,42 @@
           "links": null
         }
       ],
-      "title": "🐺 Lyonir Sampler ⏱ 1m14.1s",
+      "title": "🐺 Lyonir Sampler ⏱ 56.0s",
       "properties": {
         "cnr_id": "comfyui_fearnworksnodes",
         "ver": "0.1.2",
-        "Node name for S&R": "Lyonir_Sampler"
+        "Node name for S&R": "Lyonir_Sampler",
+        "lyonir_sampler_layout_version": 5,
+        "lyonir_sampler_widget_values_by_name": {
+          "target_width": 1080,
+          "target_height": 1080,
+          "model_family": "ltx",
+          "seed": 43,
+          "control_after_generate": "fixed",
+          "noise": "enabled",
+          "sampling_mode": "Manual Sigmas",
+          "steps": 8,
+          "scheduler": "simple",
+          "denoise": 1,
+          "sampler_name": "euler_ancestral",
+          "crop_anchor": "center",
+          "cfg": 1
+        },
+        "lyonir_sampler_widget_order": [
+          "target_width",
+          "target_height",
+          "model_family",
+          "seed",
+          "control_after_generate",
+          "noise",
+          "sampling_mode",
+          "steps",
+          "scheduler",
+          "denoise",
+          "sampler_name",
+          "crop_anchor",
+          "cfg"
+        ]
       },
       "widgets_values": [
         1080,
@@ -1654,10 +1742,11 @@
         43,
         "fixed",
         "enabled",
+        "Manual Sigmas",
         8,
-        "euler_ancestral",
         "simple",
         1,
+        "euler_ancestral",
         "center",
         1
       ],
@@ -1668,13 +1757,13 @@
         "seed": 43,
         "control_after_generate": "fixed",
         "noise": "enabled",
+        "sampling_mode": "Manual Sigmas",
         "steps": 8,
-        "sampler_name": "euler_ancestral",
         "scheduler": "simple",
         "denoise": 1,
+        "sampler_name": "euler_ancestral",
         "crop_anchor": "center",
-        "cfg": 1,
-        "sampling_mode": "Basic Scheduler"
+        "cfg": 1
       },
       "color": "#223",
       "bgcolor": "#335"
@@ -1704,7 +1793,7 @@
           ]
         }
       ],
-      "title": "Noise",
+      "title": "Noise ⏱ 0.0s",
       "properties": {
         "cnr_id": "comfy-core",
         "ver": "0.37.4",
@@ -1716,34 +1805,34 @@
       ],
       "widgets_values_named": {
         "value": 42,
-        "fixed": "fixed"
+        "control_after_generate": "fixed"
       }
     },
     {
       "id": 460,
       "type": "Lyonir_SaveVideo",
       "pos": [
-        4234.4142383155795,
-        6527.031865430121
+        4865.895672205436,
+        6404.205203347513
       ],
       "size": [
         527.890625,
-        712.6884765625
+        380
       ],
       "flags": {},
-      "order": 28,
+      "order": 33,
       "mode": 0,
       "inputs": [
         {
           "name": "images",
           "type": "IMAGE",
-          "link": 874
+          "link": 884
         },
         {
           "name": "audio",
           "shape": 7,
           "type": "AUDIO",
-          "link": 875
+          "link": 885
         },
         {
           "name": "meta_batch",
@@ -1773,7 +1862,7 @@
           "links": null
         }
       ],
-      "title": "🐺 Lyonir Save Video ⏱ 2.7s",
+      "title": "🐺 Lyonir Save Video ⏱ 2.8s",
       "properties": {
         "cnr_id": "comfyui_fearnworksnodes",
         "ver": "0.1.2",
@@ -1809,6 +1898,270 @@
       },
       "color": "#223",
       "bgcolor": "#335"
+    },
+    {
+      "id": 462,
+      "type": "ManualSigmas",
+      "pos": [
+        3881.4803056282612,
+        7086.436183133661
+      ],
+      "size": [
+        290,
+        110
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            880
+          ]
+        }
+      ],
+      "title": "ManualSigmas ⏱ 0.0s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.5.1",
+        "Node name for S&R": "ManualSigmas",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.7",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        "0.85, 0.7250, 0.4219, 0.0"
+      ],
+      "widgets_values_named": {
+        "sigmas": "0.85, 0.7250, 0.4219, 0.0"
+      }
+    },
+    {
+      "id": 463,
+      "type": "ManualSigmas",
+      "pos": [
+        2437.180305628261,
+        7145.236183133661
+      ],
+      "size": [
+        500,
+        100
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "SIGMAS",
+          "type": "SIGMAS",
+          "links": [
+            879
+          ]
+        }
+      ],
+      "title": "ManualSigmas ⏱ 0.0s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1",
+        "Node name for S&R": "ManualSigmas"
+      },
+      "widgets_values": [
+        "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+      ],
+      "widgets_values_named": {
+        "sigmas": "1.0, 0.99375, 0.9875, 0.98125, 0.975, 0.909375, 0.725, 0.421875, 0.0"
+      }
+    },
+    {
+      "id": 464,
+      "type": "LTXVSeparateAVLatent",
+      "pos": [
+        4207.17973894735,
+        6605.325258039114
+      ],
+      "size": [
+        230,
+        100
+      ],
+      "flags": {},
+      "order": 30,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "av_latent",
+          "type": "LATENT",
+          "link": 883
+        }
+      ],
+      "outputs": [
+        {
+          "name": "video_latent",
+          "type": "LATENT",
+          "links": [
+            881
+          ]
+        },
+        {
+          "name": "audio_latent",
+          "type": "LATENT",
+          "links": [
+            882
+          ]
+        }
+      ],
+      "title": "Separate AV Latent ⏱ 0.0s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.5.1",
+        "Node name for S&R": "LTXVSeparateAVLatent",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.7",
+          "input_ue_unconnectable": {}
+        }
+      }
+    },
+    {
+      "id": 465,
+      "type": "VAEDecodeTiled",
+      "pos": [
+        4478.001998947349,
+        6392.852308039113
+      ],
+      "size": [
+        280,
+        200
+      ],
+      "flags": {},
+      "order": 31,
+      "mode": 0,
+      "showAdvanced": true,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 881
+        },
+        {
+          "name": "vae",
+          "type": "VAE",
+          "link": 886
+        }
+      ],
+      "outputs": [
+        {
+          "name": "IMAGE",
+          "type": "IMAGE",
+          "links": [
+            884
+          ]
+        }
+      ],
+      "title": "VAE Decode (Tiled) ⏱ 26.2s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.14.1",
+        "Node name for S&R": "VAEDecodeTiled",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.7",
+          "input_ue_unconnectable": {}
+        }
+      },
+      "widgets_values": [
+        512,
+        64,
+        64,
+        16
+      ],
+      "widgets_values_named": {
+        "tile_size": 512,
+        "overlap": 64,
+        "temporal_size": 64,
+        "temporal_overlap": 16
+      }
+    },
+    {
+      "id": 466,
+      "type": "LTXVAudioVAEDecode",
+      "pos": [
+        4479.61250894735,
+        6842.292798039113
+      ],
+      "size": [
+        270,
+        100
+      ],
+      "flags": {},
+      "order": 32,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "samples",
+          "type": "LATENT",
+          "link": 882
+        },
+        {
+          "label": "Audio VAE",
+          "name": "audio_vae",
+          "type": "VAE",
+          "link": 887
+        }
+      ],
+      "outputs": [
+        {
+          "name": "Audio",
+          "type": "AUDIO",
+          "links": [
+            885
+          ]
+        }
+      ],
+      "title": "LTXV Audio VAE Decode ⏱ 0.3s",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.7.0",
+        "Node name for S&R": "LTXVAudioVAEDecode",
+        "enableTabs": false,
+        "tabWidth": 65,
+        "tabXOffset": 10,
+        "hasSecondTab": false,
+        "secondTabText": "Send Back",
+        "secondTabOffset": 80,
+        "secondTabWidth": 65,
+        "ue_properties": {
+          "widget_ue_connectable": {},
+          "version": "7.7",
+          "input_ue_unconnectable": {}
+        }
+      }
     }
   ],
   "links": [
@@ -1957,30 +2310,6 @@
       "INT"
     ],
     [
-      844,
-      450,
-      0,
-      444,
-      0,
-      "INT"
-    ],
-    [
-      845,
-      449,
-      0,
-      444,
-      1,
-      "INT"
-    ],
-    [
-      848,
-      449,
-      0,
-      447,
-      0,
-      "INT"
-    ],
-    [
       852,
       452,
       0,
@@ -2043,38 +2372,6 @@
       456,
       3,
       "LATENT"
-    ],
-    [
-      860,
-      457,
-      0,
-      445,
-      0,
-      "INT"
-    ],
-    [
-      861,
-      457,
-      1,
-      446,
-      0,
-      "INT"
-    ],
-    [
-      862,
-      459,
-      0,
-      456,
-      8,
-      "INT"
-    ],
-    [
-      863,
-      459,
-      0,
-      458,
-      8,
-      "INT"
     ],
     [
       864,
@@ -2149,22 +2446,6 @@
       "LATENT"
     ],
     [
-      874,
-      458,
-      0,
-      460,
-      0,
-      "IMAGE"
-    ],
-    [
-      875,
-      458,
-      1,
-      460,
-      1,
-      "AUDIO"
-    ],
-    [
       876,
       447,
       0,
@@ -2179,6 +2460,134 @@
       458,
       0,
       "MODEL"
+    ],
+    [
+      862,
+      459,
+      0,
+      456,
+      8,
+      "INT"
+    ],
+    [
+      863,
+      459,
+      0,
+      458,
+      8,
+      "INT"
+    ],
+    [
+      879,
+      463,
+      0,
+      456,
+      9,
+      "SIGMAS"
+    ],
+    [
+      880,
+      462,
+      0,
+      458,
+      9,
+      "SIGMAS"
+    ],
+    [
+      881,
+      464,
+      0,
+      465,
+      0,
+      "LATENT"
+    ],
+    [
+      882,
+      464,
+      1,
+      466,
+      0,
+      "LATENT"
+    ],
+    [
+      883,
+      458,
+      2,
+      464,
+      0,
+      "LATENT"
+    ],
+    [
+      884,
+      465,
+      0,
+      460,
+      0,
+      "IMAGE"
+    ],
+    [
+      885,
+      466,
+      0,
+      460,
+      1,
+      "AUDIO"
+    ],
+    [
+      844,
+      450,
+      0,
+      444,
+      0,
+      "INT"
+    ],
+    [
+      845,
+      449,
+      0,
+      444,
+      1,
+      "INT"
+    ],
+    [
+      860,
+      457,
+      0,
+      445,
+      0,
+      "INT"
+    ],
+    [
+      861,
+      457,
+      1,
+      446,
+      0,
+      "INT"
+    ],
+    [
+      848,
+      449,
+      0,
+      447,
+      0,
+      "INT"
+    ],
+    [
+      886,
+      440,
+      0,
+      465,
+      1,
+      "VAE"
+    ],
+    [
+      887,
+      441,
+      0,
+      466,
+      1,
+      "VAE"
     ]
   ],
   "groups": [
@@ -2282,13 +2691,13 @@
   "config": {},
   "extra": {
     "ds": {
-      "scale": 0.38554328942953164,
+      "scale": 0.35049389948139237,
       "offset": [
-        140.21977094236158,
-        -5920.423095196412
+        -46.0495302245214,
+        -5726.506810168263
       ]
     },
-    "frontendVersion": "1.52.7",
+    "frontendVersion": "1.58.5",
     "workflowRendererVersion": "Vue-corrected",
     "prompt": {
       "1": {
@@ -2687,6 +3096,12 @@
     "VHS_MetadataImage": true,
     "VHS_KeepIntermediate": true,
     "ue_links": []
+  },
+  "extensions": {
+    "seed_widgets": {
+      "456": 3,
+      "458": 3
+    }
   },
   "version": 0.4,
   "seed_widgets": {
