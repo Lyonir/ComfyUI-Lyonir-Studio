@@ -56,6 +56,22 @@ Download a JSON below and drag it into ComfyUI. These examples use the public Ly
 
 Use ComfyUI Manager to identify missing nodes. Depending on the example, your ComfyUI build must provide MiniMax H3, LTX 2.5, ComfyMathExpression and ComfySwitchNode support. Select equivalent model files available in your own installation.
 
+### Drawbox image editing with FLUX.2 Klein 4B FP8
+
+[Download workflow](examples/workflows/Lyonir%20-%20Image%20Edit%20Boxes%20Flux%202%20Klein%204b%20FP8.json)
+
+![Lyonir Drawbox and Mask Blur image editing example](examples/screenshots/drawbox-flux2-klein-4b-workflow.png)
+
+Requires Lyonir Studio **v3.5.32 or later**, ComfyUI FLUX.2 Klein support and **ComfyUI-Inpaint-CropAndStitch**. Load your own image in Load Image, draw the editing region in Lyonir Drawbox and adjust Lyonir Mask Blur before running the inpainting subgraph. The screenshot shows a cat replaced with a beagle on a couch.
+
+Model filenames used in this example:
+
+- `flux-2-klein-4b-fp8.safetensors`
+- `qwen_3_4b.safetensors`
+- `flux2-vae.safetensors`
+
+Select the corresponding model paths available in your installation. The example input image is not bundled.
+
 ### MiniMax H3 first/last-frame video
 
 [Download workflow](examples/workflows/Lyonir%20Sampler%20Minimax%20Fl2Va%20Example.json)
