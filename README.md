@@ -1,3 +1,11 @@
+## v3.5.32 — Drawbox and Mask Blur
+
+**Lyonir Drawbox** accepts an IMAGE connection and provides the original image plus a MASK combining all drawn regions. Select Rectangle, Circle/Ellipse or Freehand, choose a color and draw on the preview. Each region has a creation number and an editable name/color below the image. Freehand includes a thickness control. Undo, Redo and Clear manage the selection. Shapes and names are saved in the workflow. Native Load Image previews are available before execution. Sources without an available preview require one execution before drawing.
+
+Connect the MASK output to **Lyonir Mask Blur** to soften edges. Radius zero bypasses blur. These nodes use the existing ComfyUI environment and require no other custom-node pack.
+
+Save Image includes a thumbnail-size slider. Image Compare uses a centered vector arrow.
+
 ## v3.5.31 — exact LATENT output crop in stock VAE decoders
 
 When 🐺 Lyonir Resolution targets e.g. 1280x720 (LTX native 1280x768), 🐺 Lyonir Sampler returns directly hard-cropped IMAGE and a lossless native LATENT carrying the exact crop target. Standard ComfyUI **VAE Decode** and **VAE Decode (Tiled)** automatically apply the exact 1280x720 hard crop after decode; no extra crop node is needed. The LATENT pixels/tensor are unchanged (no VAE re-encode) so two-stage LTX sampling retains its original quality. Physical LTX latent dimensions are multiples of 32; this is a decoded-output guarantee for the built-in VAE decoders, not an impossible 720-pixel latent grid. Third-party decoders may not honor the tag.

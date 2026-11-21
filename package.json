@@ -1,6 +1,6 @@
 {
   "name": "comfyui-lyonir-studio",
-  "version": "3.5.31",
+  "version": "3.5.32",
   "private": false,
   "description": "Lyonir Studio custom nodes for ComfyUI",
   "lyonir": {
@@ -79,6 +79,6 @@
       ],
       "legacyWorkflows": "Basic Scheduler (also accepts prior Steps label)"
     },
-    "samplerLatentCrop": "v3.5.31 exact desired pixel target on LATENT dict, applies after built-in VAE Decode or VAE Decode (Tiled), untouched original sampled latent; no VAE reencode"
+    "samplerLatentCrop": "v3.5.32 exact desired pixel target on LATENT dict, applies after built-in VAE Decode or VAE Decode (Tiled), untouched original sampled latent; no VAE reencode"
   }
 }

@@ -5,6 +5,9 @@ const NODE_CLASS = "Lyonir_SaveImage";
 const BASE_NODE_WIDTH = 300;
 const BASE_NODE_HEIGHT = 420;
 const BASE_THUMB_SIZE = 36;
+const THUMB_MIN_SIZE = 24;
+const THUMB_MAX_SIZE = 96;
+const THUMB_SLIDER_HEIGHT = 18;
 
 function newHistoryId() {
     try {
@@ -197,6 +200,39 @@ function createGallery(node) {
         background: "transparent",
     });
 
+    const thumbControl = document.createElement("div");
+    Object.assign(thumbControl.style, {
+        width: "100%",
+        height: `${THUMB_SLIDER_HEIGHT}px`,
+        minHeight: `${THUMB_SLIDER_HEIGHT}px`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "0",
+        margin: "0",
+        boxSizing: "border-box",
+        overflow: "hidden",
+    });
+
+    const thumbSlider = document.createElement("input");
+    thumbSlider.type = "range";
+    thumbSlider.min = String(THUMB_MIN_SIZE);
+    thumbSlider.max = String(THUMB_MAX_SIZE);
+    thumbSlider.step = "2";
+    thumbSlider.title = "Thumbnail size";
+    thumbSlider.setAttribute("aria-label", "Thumbnail size");
+    Object.assign(thumbSlider.style, {
+        width: "92px",
+        maxWidth: "42%",
+        height: "14px",
+        margin: "0",
+        padding: "0",
+        cursor: "ew-resize",
+        accentColor: "#e3e3e3",
+        opacity: "0.82",
+    });
+    thumbControl.append(thumbSlider);
+
     const generationInfo = document.createElement("div");
     generationInfo.dataset.lyonirGenerationInfo = "1";
     Object.assign(generationInfo.style, {
@@ -272,12 +308,14 @@ function createGallery(node) {
         resolutionLabel.textContent = `Resolution: ${sizeText}`;
     }
 
-    root.append(generationInfo, previewWrap, toolbar, thumbs);
+    root.append(generationInfo, previewWrap, toolbar, thumbs, thumbControl);
     previewWrap.append(preview);
 
     let history = [];
     let selected = null;
-    let thumbSize = BASE_THUMB_SIZE;
+    node.properties ??= {};
+    let thumbSize = Math.max(THUMB_MIN_SIZE, Math.min(THUMB_MAX_SIZE, Number(node.properties.lyonir_thumbnail_size) || BASE_THUMB_SIZE));
+    thumbSlider.value = String(thumbSize);
     let resizeObserver = null;
 
     function makeSurfaceTransparent(element) {
@@ -290,7 +328,7 @@ function createGallery(node) {
     }
 
     function syncNodeSurface() {
-        for (const surface of [root, previewWrap, preview, toolbar, thumbs]) {
+        for (const surface of [root, previewWrap, preview, toolbar, thumbs, thumbControl]) {
             makeSurfaceTransparent(surface);
         }
         const host = root.parentElement;
@@ -324,7 +362,8 @@ function createGallery(node) {
         syncNodeSurface();
 
         const scale = Math.max(0.55, calculateScale());
-        thumbSize = Math.max(22, Math.round(BASE_THUMB_SIZE * scale));
+        thumbSize = Math.max(THUMB_MIN_SIZE, Math.min(THUMB_MAX_SIZE, Number(node.properties.lyonir_thumbnail_size) || BASE_THUMB_SIZE));
+        thumbSlider.value = String(thumbSize);
         const toolbarHeight = Math.max(18, Math.round(18 * Math.min(scale, 1.4)));
 
         toolbar.style.minHeight = `${toolbarHeight}px`;
@@ -541,6 +580,17 @@ function createGallery(node) {
         target.addEventListener("pointerdown", stopGraphGesture);
         target.addEventListener("wheel", stopGraphGesture, { passive: true });
     }
+
+    for (const eventName of ["pointerdown", "pointermove", "pointerup", "click", "dblclick", "contextmenu", "wheel"]) {
+        thumbSlider.addEventListener(eventName, (event) => event.stopPropagation());
+    }
+    thumbSlider.addEventListener("input", () => {
+        thumbSize = Math.max(THUMB_MIN_SIZE, Math.min(THUMB_MAX_SIZE, Number(thumbSlider.value) || BASE_THUMB_SIZE));
+        node.properties ??= {};
+        node.properties.lyonir_thumbnail_size = thumbSize;
+        syncLayout();
+        app.graph?.setDirtyCanvas?.(true, true);
+    });
 
     if (globalThis.ResizeObserver) {
         resizeObserver = new ResizeObserver(() => syncLayout());

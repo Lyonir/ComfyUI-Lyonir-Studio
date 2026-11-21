@@ -119,7 +119,21 @@ function createComparer(node) {
     });
 
     const handle = document.createElement("div");
-    handle.textContent = "↔";
+    const arrows = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    arrows.setAttribute("viewBox", "0 0 24 24");
+    arrows.setAttribute("width", "18");
+    arrows.setAttribute("height", "18");
+    arrows.setAttribute("aria-hidden", "true");
+    Object.assign(arrows.style, { display: "block", flexShrink: "0" });
+    const arrowPath = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    arrowPath.setAttribute("d", "M4 12H20 M8 8L4 12L8 16 M16 8L20 12L16 16");
+    arrowPath.setAttribute("fill", "none");
+    arrowPath.setAttribute("stroke", "currentColor");
+    arrowPath.setAttribute("stroke-width", "1.8");
+    arrowPath.setAttribute("stroke-linecap", "round");
+    arrowPath.setAttribute("stroke-linejoin", "round");
+    arrows.append(arrowPath);
+    handle.append(arrows);
     Object.assign(handle.style, {
         position: "absolute",
         top: "50%",
@@ -127,6 +141,8 @@ function createComparer(node) {
         transform: "translate(-50%, -50%)",
         width: "28px",
         height: "28px",
+        boxSizing: "border-box",
+        padding: "0",
         borderRadius: "50%",
         display: "none",
         alignItems: "center",

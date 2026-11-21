@@ -1,3 +1,12 @@
+# v3.5.32 validation
+
+- The user tested the complete local package in ComfyUI and approved publication.
+- Isolated frontend checks covered connected image previews, rectangles/ellipses/freehand, numbering, color and name edits, undo/redo, clear recovery and legacy workflow restoration.
+- Isolated mask checks with a tensor adapter covered shape rasterization, overlapping-region union, empty selections, batches and invalid inputs.
+- Save Image slider resizing/persistence and Image Compare arrow geometry passed isolated checks.
+- Python and JavaScript syntax, node registrations and package version agreement were checked before publication.
+- Full inference and real PyTorch blur execution were not rerun in this authoring environment.
+
 ## v3.5.31 local regression tests (2026-11-04; not published)
 
 - Diagnosis: v3.5.30 VAE decode→pixel crop→VAE re-encode truncated LTX spatial pixels from 720 to 704 because height 720 is not divisible by LTX VAE factor 32; lossy re-encode could also introduce image artifacts.

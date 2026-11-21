@@ -1,3 +1,14 @@
+# v3.5.32
+
+- Add Lyonir Drawbox with an IMAGE input and image/MASK outputs.
+- Draw numbered rectangles, ellipses and freehand strokes; choose individual colors and names.
+- Default to saturated red. Place the shape selector before the color picker.
+- Add undo/redo, rounded Clear controls and freehand stroke thickness.
+- Save selections in workflows and support prior single-box and multi-box selections.
+- Add the separate Lyonir Mask Blur node with a Gaussian radius control.
+- Add a persistent thumbnail-size slider to Save Image.
+- Center the Image Compare arrow using a symmetric vector icon.
+
 # v3.5.31
 
 - Fix LTX 1280x720 -> 1280x704 regression caused by re-encoding a 720px image into a 32x-compressed latent in v3.5.30.
